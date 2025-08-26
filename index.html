@@ -155,70 +155,134 @@
 
     <script>
         // ===============================
-        // CONFIGURACIÓN DE ACCESO
-        // ===============================
-        const ACTIVE_CODE = "LSAF2028"; // 🔑 <-- cámbialo en GitHub para reactivar
-        const USED_KEY = "used_code";
+// CONFIGURACIÓN DE ACCESO
+// ===============================
+const ACTIVE_CODE = "LSAF2025"; // 🔑 cambia en GitHub para reactivar
+const USED_KEY = "used_code";
 
-        const accessSection = document.getElementById('accessSection');
-        const accessDenied = document.getElementById('accessDenied');
-        const formContent = document.getElementById('formContent');
-        const accessError = document.getElementById('accessError');
-        const accessCodeInput = document.getElementById('accessCode');
+const accessSection = document.getElementById('accessSection');
+const accessDenied = document.getElementById('accessDenied');
+const formContent = document.getElementById('formContent');
+const accessError = document.getElementById('accessError');
+const accessCodeInput = document.getElementById('accessCode');
 
-        function checkAccess() {
-            let codeToCheck = accessCodeInput.value.trim();
+let currentCode = null; // Guardamos el código que se usará
 
-            if (!codeToCheck) {
-                showError("Por favor ingresa un código");
-                return;
-            }
+function checkAccess() {
+    let codeToCheck = accessCodeInput.value.trim();
 
-            // Si ya fue usado en este navegador → bloquear
-            if (localStorage.getItem(USED_KEY) === ACTIVE_CODE) {
-                showAccessDenied();
-                return;
-            }
+    if (!codeToCheck) {
+        showError("Por favor ingresa un código");
+        return;
+    }
 
-            if (codeToCheck === ACTIVE_CODE) {
-                grantAccess();
-            } else {
-                showError("Código incorrecto");
-            }
+    // Solo mostrar acceso denegado si la página ya estaba cerrada y reabierta
+    if (localStorage.getItem(USED_KEY) === ACTIVE_CODE) {
+        showAccessDenied();
+        return;
+    }
+
+    if (codeToCheck === ACTIVE_CODE) {
+        currentCode = codeToCheck; // Guardamos el código activo
+        accessSection.classList.add('hidden');
+        formContent.classList.remove('hidden');
+    } else {
+        showError("Código incorrecto");
+    }
+}
+
+function showError(message) {
+    accessError.textContent = "✗ " + message;
+    accessError.style.display = 'block';
+    setTimeout(() => { accessError.style.display = 'none'; }, 3000);
+}
+
+function showAccessDenied() {
+    accessSection.classList.add('hidden');
+    accessDenied.classList.remove('hidden');
+}
+
+// Al cargar la página, solo bloquear si cerró y vuelve a abrir
+window.onload = function() {
+    if (localStorage.getItem(USED_KEY) === ACTIVE_CODE) {
+        showAccessDenied();
+    }
+};
+
+// Enter = enviar
+accessCodeInput.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') { checkAccess(); }
+});
+
+// ===============================
+// FORMULARIO
+// ===============================
+const form = document.getElementById('vehicleForm');
+const submitBtn = document.getElementById('submitBtn');
+const messageDiv = document.getElementById('message');
+let isSubmitting = false;
+
+form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    if (isSubmitting) return;
+
+    isSubmitting = true;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="loading-spinner"></span> Procesando...';
+
+    const formData = {
+        nombre: document.getElementById('nombre').value,
+        nuim: document.getElementById('nuim').value,
+        telefono: document.getElementById('telefono').value,
+        marca: document.getElementById('marca').value,
+        modelo: document.getElementById('modelo').value,
+        color: document.getElementById('color').value,
+        matricula: document.getElementById('matricula').value
+    };
+
+    messageDiv.textContent = "Enviando datos al sistema...";
+    messageDiv.className = "message";
+    messageDiv.style.display = "block";
+
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbwZ9QKJ6fa8Z6sySry5AHmpeha1uIRuSHejuraVHU_tZXmBO7fuWsVQ-JrxE4yJQAdb/exec';
+
+    fetch(scriptURL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(formData)
+    })
+    .then(() => {
+        messageDiv.textContent = "¡Vehículo registrado correctamente!";
+        messageDiv.className = "message success";
+        form.reset();
+
+        // 🔥 Solo quemar el código después de enviar correctamente
+        if (currentCode) {
+            localStorage.setItem(USED_KEY, currentCode);
         }
 
-        function grantAccess() {
-            // Quemar la contraseña en este navegador
-            localStorage.setItem(USED_KEY, ACTIVE_CODE);
+        setTimeout(() => {
+            isSubmitting = false;
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Registrar Vehículo';
+        }, 2000);
+    })
+    .catch(error => {
+        messageDiv.textContent = "Error al enviar los datos, inténtalo de nuevo.";
+        messageDiv.className = "message error";
+        console.error(error);
+        setTimeout(() => {
+            isSubmitting = false;
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Registrar Vehículo';
+        }, 2000);
+    });
+});
 
-            accessSection.classList.add('hidden');
-            formContent.classList.remove('hidden');
-        }
-
-        function showError(message) {
-            accessError.textContent = "✗ " + message;
-            accessError.style.display = 'block';
-            setTimeout(() => { accessError.style.display = 'none'; }, 3000);
-        }
-
-        function showAccessDenied() {
-            accessSection.classList.add('hidden');
-            accessDenied.classList.remove('hidden');
-        }
-
-        // Verificar al cargar
-        window.onload = function() {
-            if (localStorage.getItem(USED_KEY) === ACTIVE_CODE) {
-                showAccessDenied();
-            }
-        };
-
-        // Enter = enviar
-        accessCodeInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') { checkAccess(); }
-        });
     </script>
 </body>
 </html>
+
 
 
