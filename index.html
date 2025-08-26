@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro Vehicular LSAF</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #0d2c46 0%, #1a4d79 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 750px;
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #0056b3 0%, #003a75 100%);
+            color: white;
+            padding: 25px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+        .logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: white;
+            padding: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+        }
+        .header-text {
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+        .header p {
+            opacity: 0.9;
+            font-size: 18px;
+        }
+        .form-container {
+            padding: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        input, select {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        input:focus, select:focus {
+            border-color: #0056b3;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.2);
+        }
+        .two-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .required::after {
+            content: " *";
+            color: #e74c3c;
+        }
+        button {
+            background: linear-gradient(135deg, #0056b3 0%, #003a75 100%);
+            color: white;
+            border: none;
+            padding: 16px;
+            font-size: 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin-top: 10px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            position: relative;
+        }
+        button:hover:not(:disabled) {
+            background: linear-gradient(135deg, #004494 0%, #002954 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        button:active:not(:disabled) {
+            transform: translateY(0);
+        }
+        button:disabled {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+        .message {
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+            display: none;
+            text-align: center;
+            font-weight: 500;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info-box {
+            background-color: #e8f4ff;
+            border-left: 4px solid #0056b3;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+        @media (max-width: 768px) {
+            .two-columns {
+                grid-template-columns: 1fr;
+            }
+            .form-container {
+                padding: 20px;
+            }
+            .header {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+            .header h1 {
+                font-size: 26px;
+            }
+        }
+        .form-section {
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .form-section-title {
+            font-size: 18px;
+            color: #0056b3;
+            margin-bottom: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .form-section-title i {
+            font-size: 20px;
+        }
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Estilos para el sistema de contraseña */
+        .password-section {
+            background: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%);
+            padding: 30px;
+            text-align: center;
+            color: white;
+        }
+        
+        .password-container {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        .password-input {
+            margin: 20px 0;
+        }
+        
+        .password-input input {
+            text-align: center;
+            font-size: 18px;
+            letter-spacing: 2px;
+        }
+        
+        .access-denied {
+            text-align: center;
+            padding: 50px;
+            color: #721c24;
+        }
+        
+        .access-denied i {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- SECCIÓN DE CONTRASEÑA (visible inicialmente) -->
+    <div id="passwordSection" class="password-section">
+        <div class="password-container">
+            <h2><i class="fas fa-lock"></i> Acceso al Sistema LSAF</h2>
+            <p>Ingresa el código de acceso proporcionado:</p>
+            
+            <div class="password-input">
+                <input type="password" id="accessCode" placeholder="Ingresa el código de acceso" style="text-align: center;">
+            </div>
+            
+            <button onclick="checkAccess()">
+                <i class="fas fa-unlock"></i> Acceder al Sistema
+            </button>
+            
+            <p id="accessError" style="color: #fff; background: rgba(200, 0, 0, 0.5); padding: 10px; border-radius: 5px; display: none; margin-top: 15px;">
+                <i class="fas fa-exclamation-circle"></i> Código incorrecto
+            </p>
+        </div>
+    </div>
+    
+    <!-- SECCIÓN DE ACCESO DENEGADO -->
+    <div id="accessDenied" class="container hidden">
+        <div class="access-denied">
+            <i class="fas fa-ban"></i>
+            <h2>Acceso Denegado</h2>
+            <p>Este enlace ha expirado o ya fue utilizado.</p>
+            <p>Contacta al administrador para obtener un nuevo acceso.</p>
+        </div>
+    </div>
+    
+    <!-- FORMULARIO (oculto inicialmente) -->
+    <div id="formContent" class="container hidden">
+        <div class="header">
+            <div class="logo-container">
+                <img src="https://i.imgur.com/fHV1Qo1.png" alt="Logo LSAF" class="logo">
+            </div>
+            <div class="header-text">
+                <h1>REGISTRO VEHICULAR LSAF</h1>
+                <p>Sistema de Gestión Vehicular</p>
+            </div>
+        </div>
+        
+        <div class="form-container">
+            <div class="info-box">
+                <i class="fas fa-info-circle"></i> Complete todos los campos obligatorios (*) para registrar el vehículo en el sistema.
+            </div>
+            
+            <div id="message" class="message"></div>
+            
+            <form id="vehicleForm">
+                <div class="form-section">
+                    <div class="form-section-title">
+                        <i class="fas fa-user"></i> Información Personal
+                    </div>
+                    <div class="form-group">
+                        <label for="nombre" class="required">Nombre y Apellido</label>
+                        <input type="text" id="nombre" name="nombre" required placeholder="Ej: David Toro">
+                    </div>
+                    
+                    <div class="two-columns">
+                        <div class="form-group">
+                            <label for="nuim" class="required">NUIM</label>
+                            <input type="text" id="nuim" name="nuim" required placeholder="Ej: #ABCD">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="telefono" class="required">Número de Teléfono</label>
+                            <input type="tel" id="telefono" name="telefono" required placeholder="Ej: 123456">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <div class="form-section-title">
+                        <i class="fas fa-car"></i> Información del Vehículo
+                    </div>
+                    <div class="two-columns">
+                        <div class="form-group">
+                            <label for="marca" class="required">Marca del Vehículo</label>
+                            <input type="text" id="marca" name="marca" required placeholder="Ej: Gallivanter">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="modelo" class="required">Modelo del Vehículo</label>
+                            <input type="text" id="modelo" name="modelo" required placeholder="Ej: Baller LE">
+                        </div>
+                    </div>
+                    
+                    <div class="two-columns">
+                        <div class="form-group">
+                            <label for="color" class="required">Color del Vehículo</label>
+                            <input type="text" id="color" name="color" required placeholder="Ej: Negro">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="matricula" class="required">Matrícula del Vehículo</label>
+                            <input type="text" id="matricula" name="matricula" required placeholder="Ej: ABC-123">
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="submit" id="submitBtn">
+                    <i class="fas fa-paper-plane"></i> Registrar Vehículo
+                </button>
+            </form>
+            
+            <div class="footer">
+                <p>Sistema de Registro Vehicular LSAF &copy; 2025</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // CONFIGURACIÓN - CAMBIA ESTA CONTRASEÑA CADA VEZ QUE COMPARTAS EL LINK
+        const CURRENT_PASSWORD = "LSAF2025"; // ← Cambia esto por una nueva contraseña cada vez
+        
+        // Elementos del DOM
+        const passwordSection = document.getElementById('passwordSection');
+        const accessDenied = document.getElementById('accessDenied');
+        const formContent = document.getElementById('formContent');
+        const accessError = document.getElementById('accessError');
+        const accessCodeInput = document.getElementById('accessCode');
+        
+        // Verificar si ya se usó este acceso
+        function checkIfUsed() {
+            const used = localStorage.getItem('formUsed');
+            if (used === 'true') {
+                passwordSection.classList.add('hidden');
+                accessDenied.classList.remove('hidden');
+                return true;
+            }
+            return false;
+        }
+        
+        // Verificar acceso
+        function checkAccess() {
+            if (checkIfUsed()) return;
+            
+            const inputCode = accessCodeInput.value.trim();
+            
+            if (inputCode === CURRENT_PASSWORD) {
+                // Acceso concedido
+                passwordSection.classList.add('hidden');
+                formContent.classList.remove('hidden');
+                
+                // Marcar como usado
+                localStorage.setItem('formUsed', 'true');
+                
+            } else {
+                // Código incorrecto
+                accessError.style.display = 'block';
+                setTimeout(() => {
+                    accessError.style.display = 'none';
+                }, 3000);
+            }
+        }
+        
+        // Teclado - permitir enviar con Enter
+        accessCodeInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkAccess();
+            }
+        });
+        
+        // Verificar al cargar la página
+        window.onload = function() {
+            if (!checkIfUsed()) {
+                passwordSection.classList.remove('hidden');
+            }
+        };
+        
+        // Código existente del formulario
+        let isSubmitting = false;
+        const submitBtn = document.getElementById('submitBtn');
+        const messageDiv = document.getElementById('message');
+        const form = document.getElementById('vehicleForm');
+        
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Si ya se está enviando, mostrar mensaje y no hacer nada
+            if (isSubmitting) {
+                messageDiv.textContent = "Su registro se está procesando, por favor espere...";
+                messageDiv.className = "message";
+                messageDiv.style.display = "block";
+                return;
+            }
+            
+            // Marcar que se está enviando
+            isSubmitting = true;
+            
+            // Deshabilitar el botón y cambiar su texto
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="loading-spinner"></span> Procesando...';
+            
+            // Obtener los valores del formulario
+            const formData = {
+                nombre: document.getElementById('nombre').value,
+                nuim: document.getElementById('nuim').value,
+                telefono: document.getElementById('telefono').value,
+                marca: document.getElementById('marca').value,
+                modelo: document.getElementById('modelo').value,
+                color: document.getElementById('color').value,
+                matricula: document.getElementById('matricula').value
+            };
+            
+            // Mostrar mensaje de carga
+            messageDiv.textContent = "Enviando datos al sistema...";
+            messageDiv.className = "message";
+            messageDiv.style.display = "block";
+            
+            // URL de Google Apps Script
+            const scriptURL = 'https://script.google.com/macros/s/AKfycbwZ9QKJ6fa8Z6sySry5AHmpeha1uIRuSHejuraVHU_tZXmBO7fuWsVQ-JrxE4yJQAdb/exec';
+            
+            // Enviar datos a Google Apps Script
+            fetch(scriptURL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(() => {
+                messageDiv.textContent = "¡Vehículo registrado correctamente en el sistema!";
+                messageDiv.className = "message success";
+                form.reset();
+                
+                // Restablecer el estado después de 3 segundos
+                setTimeout(() => {
+                    isSubmitting = false;
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Registrar Vehículo';
+                }, 3000);
+            })
+            .catch(error => {
+                messageDiv.textContent = "Error al enviar los datos. Por favor, inténtalo de nuevo.";
+                messageDiv.className = "message error";
+                console.error('Error:', error);
+                
+                // Restablecer el estado después de 3 segundos
+                setTimeout(() => {
+                    isSubmitting = false;
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Registrar Vehículo';
+                }, 3000);
+            });
+        });
+    </script>
+</body>
+</html>
