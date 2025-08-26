@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Contraseñas - LSAF</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #1a4d79 0%, #0d2c46 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+            text-align: center;
+            padding: 30px;
+        }
+        .logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: white;
+            padding: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            margin: 0 auto 20px;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        .password-display {
+            background: #f8f9fa;
+            border: 2px dashed #0056b3;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            font-size: 24px;
+            font-weight: bold;
+            color: #0056b3;
+            letter-spacing: 2px;
+            word-break: break-all;
+        }
+        button {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border: none;
+            padding: 16px;
+            font-size: 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin: 10px 0;
+        }
+        button:hover {
+            background: linear-gradient(135deg, #218838 0%, #1e9e8a 100%);
+            transform: translateY(-2px);
+        }
+        .copy-btn {
+            background: linear-gradient(135deg, #0056b3 0%, #003a75 100%);
+        }
+        .instructions {
+            background-color: #e8f4ff;
+            border-left: 4px solid #0056b3;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+            text-align: left;
+            font-size: 14px;
+        }
+        .instructions h3 {
+            margin-top: 0;
+            color: #0056b3;
+        }
+        .message {
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+            display: none;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .history {
+            margin-top: 20px;
+            text-align: left;
+        }
+        .history h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .history-list {
+            max-height: 150px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="https://i.imgur.com/fHV1Qo1.png" alt="Logo LSAF" class="logo">
+        <h1>Generador de Contraseñas LSAF</h1>
+        <p>Genera contraseñas para el sistema de registro vehicular</p>
+        
+        <div class="password-display" id="passwordDisplay">
+            Presiona "Generar" para crear una contraseña
+        </div>
+        
+        <button onclick="generatePassword()">
+            <i class="fas fa-key"></i> Generar Nueva Contraseña
+        </button>
+        
+        <button class="copy-btn" onclick="copyPassword()">
+            <i class="fas fa-copy"></i> Copiar Contraseña
+        </button>
+        
+        <div id="message" class="message"></div>
+        
+        <div class="instructions">
+            <h3><i class="fas fa-info-circle"></i> Instrucciones de uso:</h3>
+            <ol>
+                <li>Genera una nueva contraseña con el botón "Generar"</li>
+                <li>Copia la contraseña con el botón "Copiar"</li>
+                <li>Comparte esta contraseña con la persona que necesita registrar su vehículo</li>
+                <li>La contraseña anterior dejará de funcionar automáticamente</li>
+            </ol>
+        </div>
+        
+        <div class="history">
+            <h3><i class="fas fa-history"></i> Historial de Contraseñas</h3>
+            <div class="history-list" id="passwordHistory">
+                No hay contraseñas generadas aún
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Almacenamiento de contraseñas
+        const STORAGE_KEY = 'lsaf_passwords';
+        let currentPassword = '';
+        
+        // Cargar historial al iniciar
+        window.onload = function() {
+            loadPasswordHistory();
+            // Generar una contraseña automáticamente al cargar
+            generatePassword();
+        };
+        
+        function generatePassword() {
+            // Generar número aleatorio de 4 dígitos (0000-9999)
+            const randomNum = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+            currentPassword = `LSAF${randomNum}`;
+            
+            // Mostrar la contraseña
+            document.getElementById('passwordDisplay').textContent = currentPassword;
+            document.getElementById('message').style.display = 'none';
+            
+            // Guardar en el historial
+            saveToHistory(currentPassword);
+            
+            // Actualizar el formulario principal (esto requiere una modificación mínima)
+            updateMainFormPassword(currentPassword);
+        }
+        
+        function copyPassword() {
+            if (!currentPassword) {
+                showMessage('Primero genera una contraseña', 'error');
+                return;
+            }
+            
+            navigator.clipboard.writeText(currentPassword)
+                .then(() => {
+                    showMessage('Contraseña copiada al portapapeles: ' + currentPassword, 'success');
+                })
+                .catch(err => {
+                    // Fallback para navegadores antiguos
+                    const tempTextArea = document.createElement('textarea');
+                    tempTextArea.value = currentPassword;
+                    document.body.appendChild(tempTextArea);
+                    tempTextArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(tempTextArea);
+                    showMessage('Contraseña copiada: ' + currentPassword, 'success');
+                });
+        }
+        
+        function saveToHistory(password) {
+            // Obtener historial existente
+            let history = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            
+            // Agregar nueva contraseña con timestamp
+            history.unshift({
+                password: password,
+                timestamp: new Date().toLocaleString('es-ES')
+            });
+            
+            // Mantener solo las últimas 10 contraseñas
+            if (history.length > 10) {
+                history = history.slice(0, 10);
+            }
+            
+            // Guardar en localStorage
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+            
+            // Actualizar visualización
+            loadPasswordHistory();
+        }
+        
+        function loadPasswordHistory() {
+            const history = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            const historyElement = document.getElementById('passwordHistory');
+            
+            if (history.length === 0) {
+                historyElement.innerHTML = 'No hay contraseñas generadas aún';
+                return;
+            }
+            
+            historyElement.innerHTML = history.map(item => 
+                `<div style="margin-bottom: 8px; padding: 5px; border-bottom: 1px solid #eee;">
+                    <strong>${item.password}</strong> 
+                    <span style="font-size: 12px; color: #666;">(${item.timestamp})</span>
+                </div>`
+            ).join('');
+        }
+        
+        function updateMainFormPassword(newPassword) {
+            // Esta función intenta actualizar el formulario principal
+            // Nota: Esto requiere que ambos archivos estén en el mismo dominio
+            try {
+                // Guardar en localStorage para que el formulario principal lo detecte
+                localStorage.setItem('lsaf_current_password', newPassword);
+                
+                // También intentar actualizar directamente si está en la misma pestaña
+                if (window.opener) {
+                    window.opener.postMessage({
+                        type: 'UPDATE_PASSWORD',
+                        password: newPassword
+                    }, '*');
+                }
+            } catch (error) {
+                console.log('El formulario principal se actualizará en el próximo acceso');
+            }
+        }
+        
+        function showMessage(text, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = text;
+            messageDiv.className = 'message ' + type;
+            messageDiv.style.display = 'block';
+            
+            // Ocultar mensaje después de 3 segundos
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 3000);
+        }
+        
+        // Escuchar mensajes desde el formulario principal
+        window.addEventListener('message', function(event) {
+            if (event.data.type === 'REQUEST_PASSWORD') {
+                generatePassword();
+            }
+        });
+    </script>
+</body>
+</html>
