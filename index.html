@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro Vehicular LSAF</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* --- Tus estilos originales --- */
+    *{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif}
+    body{background:linear-gradient(135deg,#0d2c46 0%,#1a4d79 100%);min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px}
+    .container{background-color:white;border-radius:15px;box-shadow:0 10px 30px rgba(0,0,0,0.2);width:100%;max-width:750px;overflow:hidden}
+    .header{background:linear-gradient(135deg,#0056b3 0%,#003a75 100%);color:white;padding:25px;text-align:center;display:flex;align-items:center;justify-content:center;gap:20px;flex-wrap:wrap}
+    .logo{width:80px;height:80px;border-radius:50%;background-color:white;padding:10px;box-shadow:0 0 15px rgba(0,0,0,0.2)}
+    .header h1{font-size:32px;margin-bottom:5px;text-transform:uppercase;letter-spacing:1.5px}
+    .header p{opacity:.9;font-size:18px}
+    .form-container{padding:30px}
+    .form-group{margin-bottom:20px}
+    label{display:block;margin-bottom:8px;font-weight:600;color:#2c3e50}
+    input,select{width:100%;padding:14px;border:1px solid #ddd;border-radius:8px;font-size:16px;transition:all .3s}
+    input:focus,select:focus{border-color:#0056b3;outline:none;box-shadow:0 0 0 3px rgba(0,86,179,0.2)}
+    .two-columns{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+    .required::after{content:" *";color:#e74c3c}
+    button{background:linear-gradient(135deg,#0056b3 0%,#003a75 100%);color:white;border:none;padding:16px;font-size:18px;border-radius:8px;cursor:pointer;width:100%;font-weight:600;transition:all .3s;margin-top:10px;letter-spacing:1px;text-transform:uppercase}
+    button:hover:not(:disabled){background:linear-gradient(135deg,#004494 0%,#002954 100%);transform:translateY(-2px);box-shadow:0 5px 15px rgba(0,0,0,0.2)}
+    button:disabled{background:linear-gradient(135deg,#6c757d 0%,#495057 100%);cursor:not-allowed;opacity:.8}
+    .message{padding:15px;margin:20px 0;border-radius:8px;display:none;text-align:center;font-weight:500}
+    .success{background-color:#d4edda;color:#155724;border:1px solid #c3e6cb}
+    .error{background-color:#f8d7da;color:#721c24;border:1px solid #f5c6cb}
+    .info-box{background-color:#e8f4ff;border-left:4px solid #0056b3;padding:15px;margin:20px 0;border-radius:4px;font-size:14px}
+    .footer{text-align:center;margin-top:20px;color:#666;font-size:14px}
+    .form-section{margin-bottom:25px;padding-bottom:15px;border-bottom:1px solid #eee}
+    .form-section-title{font-size:18px;color:#0056b3;margin-bottom:15px;font-weight:600;display:flex;align-items:center;gap:10px}
+    .form-section-title i{font-size:20px}
+    .loading-spinner{display:inline-block;width:20px;height:20px;border:3px solid rgba(255,255,255,.3);border-radius:50%;border-top-color:#fff;animation:spin 1s ease-in-out infinite;margin-right:10px;vertical-align:middle}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .access-section{background:linear-gradient(135deg,#ff7e5f 0%,#feb47b 100%);padding:30px;text-align:center;color:white}
+    .access-input{margin:20px 0}
+    .hidden{display:none}
+    .access-denied{text-align:center;padding:50px;color:#721c24}
+    .access-denied i{font-size:48px;margin-bottom:20px}
+  </style>
+</head>
+<body>
+
+  <!-- 🔐 Pantalla de acceso -->
+  <div id="accessSection" class="access-section">
+    <h2><i class="fas fa-lock"></i> Sistema de Registro LSAF</h2>
+    <p>Este formulario requiere una contraseña</p>
+    <div class="access-input">
+      <input type="password" id="accessCode" placeholder="Ingrese contraseña">
+    </div>
+    <button onclick="checkAccess()"><i class="fas fa-unlock"></i> Ingresar</button>
+    <p id="accessError" style="color:#fff;background:rgba(200,0,0,0.5);padding:10px;border-radius:5px;display:none;margin-top:15px;"></p>
+  </div>
+
+  <!-- 🚫 Acceso denegado -->
+  <div id="accessDenied" class="container hidden">
+    <div class="access-denied">
+      <i class="fas fa-ban"></i>
+      <h2>Acceso Denegado</h2>
+      <p>Este enlace ya no está disponible.</p>
+      <p>Contacta al administrador para obtener una nueva clave.</p>
+    </div>
+  </div>
+
+  <!-- ✅ Formulario -->
+  <div id="formContent" class="container hidden">
+    <div class="header">
+      <div class="logo-container">
+        <img src="https://i.imgur.com/fHV1Qo1.png" alt="Logo LSAF" class="logo">
+      </div>
+      <div class="header-text">
+        <h1>REGISTRO VEHICULAR LSAF</h1>
+        <p>Sistema de Gestión Vehicular</p>
+      </div>
+    </div>
+    <div class="form-container">
+      <div class="info-box">
+        <i class="fas fa-info-circle"></i> Complete todos los campos obligatorios (*) para registrar el vehículo en el sistema.
+      </div>
+      <div id="message" class="message"></div>
+
+      <form id="vehicleForm">
+        <div class="form-section">
+          <div class="form-section-title"><i class="fas fa-user"></i> Información Personal</div>
+          <div class="form-group">
+            <label class="required">Nombre y Apellido</label>
+            <input type="text" id="nombre" required>
+          </div>
+          <div class="two-columns">
+            <div class="form-group">
+              <label class="required">NUIM</label>
+              <input type="text" id="nuim" required>
+            </div>
+            <div class="form-group">
+              <label class="required">Teléfono</label>
+              <input type="tel" id="telefono" required>
+            </div>
+          </div>
+        </div>
+        <div class="form-section">
+          <div class="form-section-title"><i class="fas fa-car"></i> Información Vehículo</div>
+          <div class="two-columns">
+            <div class="form-group"><label class="required">Marca</label><input type="text" id="marca" required></div>
+            <div class="form-group"><label class="required">Modelo</label><input type="text" id="modelo" required></div>
+          </div>
+          <div class="two-columns">
+            <div class="form-group"><label class="required">Color</label><input type="text" id="color" required></div>
+            <div class="form-group"><label class="required">Matrícula</label><input type="text" id="matricula" required></div>
+          </div>
+        </div>
+        <button type="submit" id="submitBtn"><i class="fas fa-paper-plane"></i> Registrar Vehículo</button>
+      </form>
+
+      <div class="footer">
+        <p>Sistema de Registro Vehicular LSAF © 2025</p>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // ============================
+  // 🔑 SISTEMA DE CONTRASEÑA ÚNICA
+  // ============================
+  const ACTIVE_CODE = "LSAF2025"; // <--- cámbiala en GitHub para habilitar de nuevo
+
+  const accessSection = document.getElementById('accessSection');
+  const accessDenied = document.getElementById('accessDenied');
+  const formContent = document.getElementById('formContent');
+  const accessError = document.getElementById('accessError');
+  const accessCodeInput = document.getElementById('accessCode');
+
+  function checkAccess() {
+    const code = accessCodeInput.value.trim();
+    if (!code) {
+      showError("Ingrese la contraseña");
+      return;
+    }
+    if (code === ACTIVE_CODE) {
+      grantAccess();
+    } else {
+      showAccessDenied();
+    }
+  }
+
+  function grantAccess() {
+    sessionStorage.setItem("access_granted","true");
+    accessSection.classList.add('hidden');
+    formContent.classList.remove('hidden');
+  }
+
+  function showError(msg) {
+    accessError.textContent = "✗ " + msg;
+    accessError.style.display = 'block';
+    setTimeout(()=>{ accessError.style.display='none'; },3000);
+  }
+
+  function showAccessDenied() {
+    accessSection.classList.add('hidden');
+    accessDenied.classList.remove('hidden');
+  }
+
+  window.onload = function() {
+    if (sessionStorage.getItem("access_granted")==="true") {
+      accessSection.classList.add('hidden');
+      formContent.classList.remove('hidden');
+    }
+  };
+
+  // ============================
+  // 📤 FORMULARIO GOOGLE SHEETS
+  // ============================
+  let isSubmitting = false;
+  const submitBtn = document.getElementById('submitBtn');
+  const messageDiv = document.getElementById('message');
+  const form = document.getElementById('vehicleForm');
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    if(isSubmitting){return;}
+    isSubmitting=true;
+    submitBtn.disabled=true;
+    submitBtn.innerHTML='<span class="loading-spinner"></span> Procesando...';
+
+    const formData = {
+      nombre: document.getElementById('nombre').value,
+      nuim: document.getElementById('nuim').value,
+      telefono: document.getElementById('telefono').value,
+      marca: document.getElementById('marca').value,
+      modelo: document.getElementById('modelo').value,
+      color: document.getElementById('color').value,
+      matricula: document.getElementById('matricula').value
+    };
+
+    const scriptURL = 'TU_URL_DE_APP_SCRIPT';
+
+    fetch(scriptURL,{
+      method:'POST',
+      mode:'no-cors',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(formData)
+    })
+    .then(()=>{
+      messageDiv.textContent="¡Vehículo registrado correctamente!";
+      messageDiv.className="message success";
+      messageDiv.style.display="block";
+      form.reset();
+      resetBtn();
+    })
+    .catch(err=>{
+      messageDiv.textContent="Error al enviar datos.";
+      messageDiv.className="message error";
+      messageDiv.style.display="block";
+      console.error(err);
+      resetBtn();
+    });
+  });
+
+  function resetBtn(){
+    setTimeout(()=>{
+      isSubmitting=false;
+      submitBtn.disabled=false;
+      submitBtn.innerHTML='<i class="fas fa-paper-plane"></i> Registrar Vehículo';
+    },3000);
+  }
+</script>
+</body>
+</html>
