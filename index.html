@@ -154,41 +154,96 @@
         </div>
     </div>
 
+    </style>
+</head>
+<body>
+    <!-- SECCIÓN DE ACCESO -->
+    <div id="accessSection" class="access-section">
+        <div class="access-container">
+            <h2><i class="fas fa-lock"></i> Sistema de Registro LSAF</h2>
+            <p>Este formulario requiere un código de acceso válido</p>
+            
+            <div class="access-input">
+                <input type="password" id="passwordInput" placeholder="Ingrese la contraseña">
+            </div>
+
+            <button onclick="checkAccess()">
+                <i class="fas fa-unlock"></i> Verificar Acceso
+            </button>
+            
+            <p id="accessError" style="color: #fff; background: rgba(200, 0, 0, 0.5); padding: 10px; border-radius: 5px; display: none; margin-top: 15px;">
+                <i class="fas fa-exclamation-circle"></i> Código incorrecto o ya utilizado
+            </p>
+        </div>
+    </div>
+
+    <!-- ACCESO DENEGADO -->
+    <div id="accessDenied" class="container hidden">
+        <div class="access-denied">
+            <i class="fas fa-ban"></i>
+            <h2>Acceso Denegado</h2>
+            <p>El código de acceso ya fue utilizado o no es válido.</p>
+            <p>Contacta con Plana Mayor para registrar un nuevo vehículo.</p>
+        </div>
+    </div>
+
+    <!-- FORMULARIO -->
+    <div id="formContent" class="container hidden">
+        <!-- ... Aquí va tu formulario existente ... -->
+    </div>
+
     <script>
-    // URL de tu Apps Script publicado como Web App
-    const SHEET_URL = "https://script.google.com/macros/s/AKfycbwuZVRDOgShaXoDpfNKEG6UvO9FQ_Uh0ULlV9XOvntESC_hR0Xslz-yadDb-CkRolR_/exec";
-    let ACTIVE_CODE = "";
+        const passwordInput = document.getElementById('passwordInput');
+        const accessSection = document.getElementById('accessSection');
+        const formContent = document.getElementById('formContent');
+        const accessDenied = document.getElementById('accessDenied');
+        const accessError = document.getElementById('accessError');
 
-    // === Cargar el código actual desde Google Sheets ===
-    async function fetchCurrentCode() {
-    try {
-        const res = await fetch("https://script.google.com/macros/s/AKfycbwuZVRDOgShaXoDpfNKEG6UvO9FQ_Uh0ULlV9XOvntESC_hR0Xslz-yadDb-CkRolR_/exec" + Date.now());
-        const code = await res.text();
-        return code.trim();
-    } catch (err) {
-        console.error("Error obteniendo código:", err);
-        return null;
-    }
-}
+        const CURRENT_CODE_URL = "https://script.google.com/macros/s/AKfycbwuZVRDOgShaXoDpfNKEG6UvO9FQ_Uh0ULlV9XOvntESC_hR0Xslz-yadDb-CkRolR_/exec";
 
-    // === Verificar acceso ===
-    async function checkAccess() {
-    const inputPassword = document.getElementById("passwordInput").value;
-    const currentCode = await fetchCurrentCode();
+        let currentCode = null;
 
-    if (inputPassword === currentCode) {
-        document.getElementById("accessSection").style.display = "none";
-        document.getElementById("formContent").style.display = "block";
-    } else {
-        document.getElementById("accessError").style.display = "block";
-    }
-}
+        async function fetchCurrentCode() {
+            try {
+                const res = await fetch(CURRENT_CODE_URL + "?" + Date.now());
+                const code = await res.text();
+                console.log("Código actual recibido:", code.trim());
+                return code.trim();
+            } catch (err) {
+                console.error("Error obteniendo código:", err);
+                return null;
+            }
+        }
 
-    // Llamar automáticamente al cargar la página
-    fetchCurrentCode();
-  </script>
+        async function checkAccess() {
+            const enteredCode = passwordInput.value.trim();
+            const validCode = await fetchCurrentCode();
+
+            console.log("Contraseña ingresada:", enteredCode);
+            console.log("Contraseña válida:", validCode);
+
+            if (!enteredCode) {
+                showError("Por favor ingrese una contraseña");
+                return;
+            }
+
+            if (enteredCode === validCode) {
+                accessSection.classList.add('hidden');
+                formContent.classList.remove('hidden');
+            } else {
+                showError("Contraseña incorrecta");
+            }
+        }
+
+        function showError(msg) {
+            accessError.textContent = "✗ " + msg;
+            accessError.style.display = "block";
+            setTimeout(() => { accessError.style.display = "none"; }, 3000);
+        }
+    </script>
 </body>
 </html>
+
 
 
 
