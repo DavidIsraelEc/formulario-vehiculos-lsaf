@@ -183,40 +183,27 @@
         };
 
         // Generar y guardar nueva contraseña
-        async function generatePassword() {
-            const generateBtn = document.getElementById('generateBtn');
-            generateBtn.innerHTML = '<span class="loading"></span> Generando...';
-            generateBtn.disabled = true;
+       async function generatePassword() {
+    const randomNum = Math.floor(Math.random() * 10000).toString().padStart(4,'0');
+    const newPassword = `LSAF${randomNum}`;
 
-            try {
-                const randomNum = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-                const newPassword = `LSAF${randomNum}`;
-                document.getElementById('passwordDisplay').textContent = newPassword;
-
-                const res = await fetch(WEBAPP_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: 'updatePassword',
-                        newPassword: newPassword
-                    })
-                });
-                const data = await res.json();
-
-                if (data.success) {
-                    currentPassword = data.password;
-                    showMessage('¡Contraseña actualizada correctamente!', 'success');
-                } else {
-                    throw new Error(data.message || 'Error desconocido');
-                }
-            } catch (err) {
-                console.error('Error al actualizar:', err);
-                showMessage('Error: ' + err.message, 'error');
-            } finally {
-                generateBtn.innerHTML = '<i class="fas fa-key"></i> Generar Nueva Contraseña';
-                generateBtn.disabled = false;
-            }
+    try {
+        const response = await fetch(WEBAPP_URL, {
+            method: 'POST',
+            body: new URLSearchParams({ password: newPassword })
+        });
+        const data = await response.json();
+        if (data.success) {
+            document.getElementById('passwordDisplay').textContent = newPassword;
+            showMessage('Contraseña actualizada correctamente', 'success');
+        } else {
+            showMessage('Error al actualizar: ' + (data.error||''), 'error');
         }
+    } catch(e) {
+        showMessage('Error de conexión: '+e.message, 'error');
+    }
+}
+
 
         function copyPassword() {
             if (!currentPassword) {
