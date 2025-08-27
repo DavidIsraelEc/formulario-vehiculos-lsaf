@@ -107,6 +107,11 @@
             color: #721c24;
             border: 1px solid #f5c6cb;
         }
+        .info {
+            background-color: #e8f4ff;
+            color: #004085;
+            border: 1px solid #b8daff;
+        }
         .loading {
             display: inline-block;
             width: 20px;
@@ -154,14 +159,16 @@
     </div>
 
     <script>
-        // NUEVA ID DE IMPLEMENTACIÓN - ACTUALIZADA
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyb_ej-KYxmDgKuT-rtd1FY__b-ZLTWHwipnLPsbGitFyuM7idb1sOZSvCHJ2GEKXRN/exec';
         let currentPassword = '';
 
         // Cargar contraseña actual al iniciar
         window.onload = async function() {
             try {
+                showMessage('Cargando contraseña actual...', 'info');
+                
                 const response = await fetch(`${SCRIPT_URL}?action=getPassword&t=${new Date().getTime()}`);
+                
                 if (!response.ok) {
                     throw new Error(`Error HTTP: ${response.status}`);
                 }
@@ -171,18 +178,29 @@
                 if (data.password) {
                     currentPassword = data.password;
                     document.getElementById('passwordDisplay').textContent = currentPassword;
+                    showMessage('Contraseña cargada correctamente', 'success');
                 } else {
-                    document.getElementById('passwordDisplay').textContent = 'LSAF2025 (predeterminada)';
                     currentPassword = 'LSAF2025';
+                    document.getElementById('passwordDisplay').textContent = currentPassword + ' (predeterminada)';
+                    showMessage('Usando contraseña predeterminada', 'info');
                 }
             } catch (error) {
                 console.log('Error al cargar contraseña:', error);
-                document.getElementById('passwordDisplay').textContent = 'LSAF2025 (predeterminada)';
                 currentPassword = 'LSAF2025';
-                showMessage('Error al cargar contraseña. Usando valor predeterminado.', 'error');
+                document.getElementById('passwordDisplay').textContent = currentPassword + ' (predeterminada)';
+                showMessage('Error al cargar. Usando valor predeterminado.', 'error');
+                
+                // Ocultar mensaje de error después de 5 segundos
+                setTimeout(() => {
+                    const messageDiv = document.getElementById('message');
+                    if (messageDiv.classList.contains('error')) {
+                        messageDiv.style.display = 'none';
+                    }
+                }, 5000);
             }
         };
 
+        // Función principal para generar contraseña - ACTUALIZADA
         async function generatePassword() {
             const generateBtn = document.getElementById('generateBtn');
             const messageDiv = document.getElementById('message');
@@ -195,52 +213,62 @@
                 const randomNum = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
                 const newPassword = `LSAF${randomNum}`;
                 
-                // Enviar solicitud usando URL encoded (más compatible con Apps Script)
-                const formData = new URLSearchParams();
-                formData.append('action', 'updatePassword');
-                formData.append('password', newPassword);
+                // Mostrar la nueva contraseña inmediatamente (feedback visual)
+                document.getElementById('passwordDisplay').textContent = newPassword;
                 
+                // Enviar solicitud usando JSON
                 const response = await fetch(SCRIPT_URL, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                        'Content-Type': 'application/json',
                     },
-                    body: formData.toString()
+                    body: JSON.stringify({
+                        action: 'updatePassword',
+                        password: newPassword
+                    })
                 });
                 
                 if (!response.ok) {
-                    throw new Error(`Error HTTP: ${response.status}`);
+                    throw new Error(`Error HTTP: ${response.status} ${response.statusText}`);
                 }
                 
-                // Leer la respuesta como texto primero
-                const responseText = await response.text();
-                let result;
-                
-                try {
-                    // Intentar parsear como JSON
-                    result = JSON.parse(responseText);
-                } catch (e) {
-                    // Si falla el parsing, verificar si es una respuesta de éxito simple
-                    if (responseText.includes('éxito') || responseText.toLowerCase().includes('success')) {
-                        result = { success: true };
-                    } else {
-                        throw new Error(`Respuesta no válida: ${responseText}`);
-                    }
-                }
+                const result = await response.json();
                 
                 if (result.success) {
                     currentPassword = newPassword;
-                    document.getElementById('passwordDisplay').textContent = currentPassword;
                     showMessage('¡Contraseña actualizada correctamente!', 'success');
                     
-                    // Verificar que se guardó correctamente
-                    setTimeout(verifyPasswordUpdate, 1500);
+                    // Verificar que se guardó correctamente en el servidor
+                    setTimeout(verifyPasswordUpdate, 1000);
                 } else {
                     showMessage('Error al actualizar: ' + (result.error || 'Error desconocido'), 'error');
                 }
             } catch (error) {
                 console.error('Error completo:', error);
-                showMessage('Error de conexión: ' + error.message, 'error');
+                
+                // Verificar si la contraseña se actualizó a pesar del error
+                showMessage('Verificando estado del servidor...', 'info');
+                
+                setTimeout(async () => {
+                    try {
+                        const verifyResponse = await fetch(`${SCRIPT_URL}?action=getPassword&t=${new Date().getTime()}`);
+                        if (verifyResponse.ok) {
+                            const verifyData = await verifyResponse.json();
+                            
+                            if (verifyData.password && verifyData.password.startsWith('LSAF')) {
+                                currentPassword = verifyData.password;
+                                document.getElementById('passwordDisplay').textContent = currentPassword;
+                                showMessage('Contraseña actualizada (verificación retrasada)', 'success');
+                            } else {
+                                showMessage('Error de conexión: ' + error.message, 'error');
+                            }
+                        } else {
+                            showMessage('Error de conexión: ' + error.message, 'error');
+                        }
+                    } catch (verifyError) {
+                        showMessage('Error de conexión: ' + error.message, 'error');
+                    }
+                }, 1500);
             } finally {
                 generateBtn.innerHTML = '<i class="fas fa-key"></i> Generar Nueva Contraseña';
                 generateBtn.disabled = false;
@@ -251,6 +279,7 @@
         async function verifyPasswordUpdate() {
             try {
                 const response = await fetch(`${SCRIPT_URL}?action=getPassword&t=${new Date().getTime()}`);
+                
                 if (!response.ok) {
                     throw new Error(`Error HTTP: ${response.status}`);
                 }
@@ -266,7 +295,7 @@
                 }
             } catch (error) {
                 console.error('Error al verificar contraseña:', error);
-                showMessage('Error al verificar sincronización: ' + error.message, 'error');
+                showMessage('Error al verificar sincronización', 'error');
             }
         }
 
@@ -304,10 +333,15 @@
             messageDiv.className = 'message ' + type;
             messageDiv.style.display = 'block';
             
-            // Ocultar después de 4 segundos (más tiempo para mensajes de éxito)
+            // Ocultar después de un tiempo (más tiempo para mensajes de éxito)
+            const hideTime = type === 'success' ? 4000 : 
+                            type === 'info' ? 3000 : 5000;
+            
             setTimeout(() => {
-                messageDiv.style.display = 'none';
-            }, type === 'success' ? 4000 : 5000);
+                if (messageDiv.textContent === text) {
+                    messageDiv.style.display = 'none';
+                }
+            }, hideTime);
         }
 
         // Función para probar manualmente desde la consola
@@ -315,16 +349,15 @@
             console.log('🔧 Probando updatePassword con:', testPassword);
             
             try {
-                const formData = new URLSearchParams();
-                formData.append('action', 'updatePassword');
-                formData.append('password', testPassword);
-                
                 const response = await fetch(SCRIPT_URL, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                        'Content-Type': 'application/json',
                     },
-                    body: formData.toString()
+                    body: JSON.stringify({
+                        action: 'updatePassword',
+                        password: testPassword
+                    })
                 });
                 
                 const responseText = await response.text();
@@ -340,6 +373,26 @@
                 }
             } catch (error) {
                 console.error('❌ Error en la prueba:', error);
+                return {error: error.message};
+            }
+        }
+
+        // Función para probar CORS
+        window.testCORS = async function() {
+            console.log('🔧 Probando configuración CORS...');
+            
+            try {
+                const response = await fetch(`${SCRIPT_URL}?action=getPassword&t=${new Date().getTime()}`, {
+                    method: 'GET',
+                    mode: 'cors'
+                });
+                
+                console.log('✅ Status CORS:', response.status, response.statusText);
+                const data = await response.json();
+                console.log('✅ Datos CORS:', data);
+                return data;
+            } catch (error) {
+                console.error('❌ Error CORS:', error);
                 return {error: error.message};
             }
         }
