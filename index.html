@@ -162,35 +162,30 @@ function fetchCurrentCode() {
   return new Promise((resolve) => {
     window.callback = (data) => {
       ACTIVE_CODE = data.currentCode;
-      console.log("Código recibido:", ACTIVE_CODE);
+      console.log("Código recibido:", ACTIVE_CODE); // ✅ muestra el código correcto
       resolve();
     };
 
-    // carga dinámica
+    // carga dinámica con cache-busting
     let script = document.createElement("script");
-    script.src = SHEET_URL + "?callback=callback&t=" + new Date().getTime();
+    script.src = "https://script.google.com/macros/s/TU_SCRIPT_ID/exec?callback=callback&t=" + new Date().getTime();
     document.body.appendChild(script);
   });
 }
-
-
 // Validar acceso
 async function checkAccess() {
-  await fetchCurrentCode(); // 👈 garantiza que ACTIVE_CODE se actualice
+  await fetchCurrentCode();
+  const inputCode = document.getElementById("accessCode").value.trim();
 
-  const code = document.getElementById('accessCode').value.trim();
-  console.log("Código ingresado:", code);
-  console.log("Código esperado:", ACTIVE_CODE);
-
-  if (code === ACTIVE_CODE) {
-    document.getElementById('accessSection').classList.add('hidden');
-    document.getElementById('formContent').classList.remove('hidden');
+  if (inputCode === ACTIVE_CODE) {
+    console.log("✅ Acceso concedido");
+    document.getElementById("accessSection").style.display = "none";
+    document.getElementById("formSection").style.display = "block";
   } else {
-    document.getElementById('accessError').textContent = "Código incorrecto";
+    console.log("❌ Código inválido");
+    document.getElementById("accessError").textContent = "Código incorrecto, intente de nuevo.";
   }
 }
-
-
 
 // Enviar formulario
 const form = document.getElementById('vehicleForm');
@@ -224,6 +219,7 @@ setInterval(fetchCurrentCode, 10000);
 </script>
 </body>
 </html>
+
 
 
 
