@@ -47,76 +47,29 @@ Presiona "Generar" para crear una contraseña
 </div>
 
 <script>
-const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwjC9OvoHQOqksobwRntn-5GP-DsWLyzIo3SciHVnS5VhirVcdc0iitVKfezUiqH8FO/exec'; // reemplaza por tu URL
+const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwjC9OvoHQOqksobwRntn-5GP-DsWLyzIo3SciHVnS5VhirVcdc0iitVKfezUiqH8FO/exec';
+const passwordField = document.getElementById('newPassword');
 
-let currentPassword = 'LSAF2025';
-
-// Función para cargar contraseña actual usando JSONP
-function loadPassword() {
-    return new Promise(resolve => {
-        const callbackName = 'cb' + Math.random().toString(36).substr(2,5);
-        window[callbackName] = function(data) {
-            delete window[callbackName];
-            script.remove();
-            if(data && data.password) { currentPassword = data.password; resolve(data.password); }
-            else resolve(currentPassword);
-        };
-        const script = document.createElement('script');
-        script.src = `${WEBAPP_URL}?action=getPassword&callback=${callbackName}`;
-        document.body.appendChild(script);
-    });
+function generateRandomPassword(){
+    const chars='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let pass='';
+    for(let i=0;i<8;i++){pass+=chars.charAt(Math.floor(Math.random()*chars.length));}
+    return 'LSAF'+pass;
 }
 
-// Función para actualizar contraseña en el Sheet
-function updatePassword(newPassword) {
-    return new Promise((resolve,reject)=>{
-        const callbackName = 'cb' + Math.random().toString(36).substr(2,5);
-        window[callbackName] = function(data){
-            delete window[callbackName];
-            script.remove();
-            if(data && data.success) resolve(data);
-            else reject(new Error(data.error || 'Error al actualizar'));
-        };
-        const script = document.createElement('script');
-        script.src = `${WEBAPP_URL}?action=updatePassword&password=${encodeURIComponent(newPassword)}&callback=${callbackName}`;
-        script.onerror = ()=>{delete window[callbackName]; script.remove(); reject(new Error('Error de conexión'));}
-        document.body.appendChild(script);
-    });
+function generatePassword(){
+    const newPass = generateRandomPassword();
+    // Guardar en el sheet via JSONP
+    const cb='cb'+Math.random().toString(36).substr(2,5);
+    window[cb]=function(data){delete window[cb];script.remove(); passwordField.value=newPass; alert('Contraseña generada: '+newPass);}
+    const script=document.createElement('script');
+    script.src=`${WEBAPP_URL}?action=setPassword&password=${newPass}&callback=${cb}`;
+    document.body.appendChild(script);
 }
-
-async function generatePassword() {
-    const btn = document.getElementById('generateBtn');
-    const msg = document.getElementById('message');
-    btn.innerHTML = '<span class="loading"></span> Generando...';
-    btn.disabled = true;
-
-    try {
-        const num = Math.floor(Math.random()*10000).toString().padStart(4,'0');
-        const newPassword = `LSAF${num}`;
-        document.getElementById('passwordDisplay').textContent = newPassword;
-        await updatePassword(newPassword);
-        currentPassword = newPassword;
-        msg.textContent = '¡Contraseña actualizada correctamente!';
-        msg.className = 'message success';
-        msg.style.display='block';
-    } catch(e){
-        msg.textContent = 'Error de conexión: '+e.message;
-        msg.className='message error';
-        msg.style.display='block';
-        document.getElementById('passwordDisplay').textContent = currentPassword;
-    } finally {
-        btn.innerHTML='<i class="fas fa-key"></i> Generar Nueva Contraseña';
-        btn.disabled=false;
-    }
-}
-
-function copyPassword(){
-    navigator.clipboard.writeText(currentPassword)
-    .then(()=>{alert('Contraseña copiada: '+currentPassword);})
-    .catch(()=>{alert('No se pudo copiar, usa Ctrl+C');});
-}
-
-window.onload = loadPassword;
 </script>
+
+<button onclick="generatePassword()">Generar contraseña</button>
+<input type="text" id="newPassword" readonly>
+
 </body>
 </html>
