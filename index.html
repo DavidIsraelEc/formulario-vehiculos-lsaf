@@ -2,24 +2,36 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro Vehicular LSAF</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: Arial, sans-serif; background: #1e1e2f; color: #fff; margin:0; padding:0;}
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1c1c1c;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+        }
         .hidden { display: none; }
-        .access-section, .container { display:flex; justify-content:center; align-items:center; min-height:100vh; }
-        .access-container { text-align:center; background: #2b2b3f; padding: 30px; border-radius: 10px; }
-        input { padding:10px; border-radius:5px; border:none; width: 250px; margin:5px 0;}
-        button { padding:10px 20px; border:none; border-radius:5px; background:#4caf50; color:#fff; cursor:pointer;}
-        button:disabled { background:#999; cursor:not-allowed;}
-        .message { margin: 15px 0; padding: 10px; border-radius: 5px; display: none;}
-        .message.success { background: rgba(0,200,0,0.5);}
-        .message.error { background: rgba(200,0,0,0.5);}
-        .form-container { background:#2b2b3f; padding:20px; border-radius:10px; width:90%; max-width:700px;}
-        .two-columns { display:flex; gap:10px;}
-        .form-group { flex:1; display:flex; flex-direction:column; margin-bottom:10px;}
-        label.required::after { content:" *"; color:red;}
+        .container { max-width: 800px; margin: auto; padding: 20px; }
+        .access-section { display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .access-container { background: #2c2c2c; padding: 30px; border-radius: 8px; text-align: center; }
+        .access-container input { padding: 10px; width: 80%; margin: 15px 0; border-radius: 5px; border: none; }
+        .access-container button { padding: 10px 20px; cursor: pointer; border: none; border-radius: 5px; background: #007bff; color: #fff; }
+        #accessError { display: none; margin-top: 10px; }
+        .form-container { background: #2c2c2c; padding: 20px; border-radius: 8px; margin-top: 20px; }
+        .form-section { margin-bottom: 20px; }
+        .form-section-title { font-weight: bold; margin-bottom: 10px; }
+        .form-group { margin-bottom: 10px; }
+        input[type="text"], input[type="tel"], input[type="password"] {
+            padding: 8px; width: 100%; border-radius: 5px; border: none;
+        }
+        button#submitBtn { padding: 10px 20px; border: none; border-radius: 5px; background: #28a745; color: #fff; cursor: pointer; }
+        .message { margin-top: 15px; padding: 10px; border-radius: 5px; display: none; }
+        .message.success { background-color: rgba(0, 200, 0, 0.5); }
+        .message.error { background-color: rgba(200, 0, 0, 0.5); }
+        .two-columns { display: flex; gap: 20px; }
+        .two-columns .form-group { flex: 1; }
     </style>
 </head>
 <body>
@@ -30,117 +42,150 @@
             <h2><i class="fas fa-lock"></i> Sistema de Registro LSAF</h2>
             <p>Este formulario requiere un código de acceso válido</p>
             <input type="password" id="passwordInput" placeholder="Ingrese la contraseña">
-            <button onclick="checkAccess()"><i class="fas fa-unlock"></i> Verificar Acceso</button>
-            <p id="accessError" class="message error">Código incorrecto o ya utilizado</p>
+            <button onclick="checkAccess()">
+                <i class="fas fa-unlock"></i> Verificar Acceso
+            </button>
+            <p id="accessError">
+                <i class="fas fa-exclamation-circle"></i> Código incorrecto o ya utilizado
+            </p>
         </div>
     </div>
 
     <!-- FORMULARIO -->
     <div id="formContent" class="container hidden">
         <div class="form-container">
-            <h1>Registro Vehicular LSAF</h1>
-            <div id="message" class="message success"></div>
+            <h1>REGISTRO VEHICULAR LSAF</h1>
+            <div class="message" id="formMessage"></div>
+
             <form id="vehicleForm">
-                <div class="form-group">
-                    <label for="nombre" class="required">Nombre y Apellido</label>
-                    <input type="text" id="nombre" name="nombre" required>
+                <div class="form-section">
+                    <div class="form-section-title"><i class="fas fa-user"></i> Información Personal</div>
+                    <div class="form-group">
+                        <label for="nombre">Nombre y Apellido *</label>
+                        <input type="text" id="nombre" name="nombre" required placeholder="Ej: David Toro">
+                    </div>
+                    <div class="two-columns">
+                        <div class="form-group">
+                            <label for="nuim">NUIM *</label>
+                            <input type="text" id="nuim" name="nuim" required placeholder="Ej: #ABCD">
+                        </div>
+                        <div class="form-group">
+                            <label for="telefono">Número de Teléfono *</label>
+                            <input type="tel" id="telefono" name="telefono" required placeholder="Ej: 123456">
+                        </div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="nuim" class="required">NUIM</label>
-                    <input type="text" id="nuim" name="nuim" required>
+
+                <div class="form-section">
+                    <div class="form-section-title"><i class="fas fa-car"></i> Información del Vehículo</div>
+                    <div class="two-columns">
+                        <div class="form-group">
+                            <label for="marca">Marca del Vehículo *</label>
+                            <input type="text" id="marca" name="marca" required placeholder="Ej: Gallivanter">
+                        </div>
+                        <div class="form-group">
+                            <label for="modelo">Modelo del Vehículo *</label>
+                            <input type="text" id="modelo" name="modelo" required placeholder="Ej: Baller LE">
+                        </div>
+                    </div>
+                    <div class="two-columns">
+                        <div class="form-group">
+                            <label for="color">Color del Vehículo *</label>
+                            <input type="text" id="color" name="color" required placeholder="Ej: Negro">
+                        </div>
+                        <div class="form-group">
+                            <label for="matricula">Matrícula del Vehículo *</label>
+                            <input type="text" id="matricula" name="matricula" required placeholder="Ej: ABC-123">
+                        </div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="telefono" class="required">Número de Teléfono</label>
-                    <input type="tel" id="telefono" name="telefono" required>
-                </div>
-                <div class="form-group">
-                    <label for="marca" class="required">Marca del Vehículo</label>
-                    <input type="text" id="marca" name="marca" required>
-                </div>
-                <div class="form-group">
-                    <label for="modelo" class="required">Modelo del Vehículo</label>
-                    <input type="text" id="modelo" name="modelo" required>
-                </div>
-                <div class="form-group">
-                    <label for="color" class="required">Color del Vehículo</label>
-                    <input type="text" id="color" name="color" required>
-                </div>
-                <div class="form-group">
-                    <label for="matricula" class="required">Matrícula del Vehículo</label>
-                    <input type="text" id="matricula" name="matricula" required>
-                </div>
-                <button type="submit" id="submitBtn"><i class="fas fa-paper-plane"></i> Registrar Vehículo</button>
+
+                <button type="submit" id="submitBtn">
+                    <i class="fas fa-paper-plane"></i> Registrar Vehículo
+                </button>
             </form>
         </div>
     </div>
 
 <script>
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwuZVRDOgShaXoDpfNKEG6UvO9FQ_Uh0ULlV9XOvntESC_hR0Xslz-yadDb-CkRolR_/exec";
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwuZVRDOgShaXoDpfNKEG6UvO9FQ_Uh0ULlV9XOvntESC_hR0Xslz-yadDb-CkRolR_/exec";
 
-    // Verificar contraseña
-    async function checkAccess() {
-        const input = document.getElementById('passwordInput').value.trim();
-        if (!input) return;
+let currentCode = "";
 
-        try {
-            const res = await fetch(`${WEB_APP_URL}?t=${Date.now()}`);
-            const data = await res.json(); // { currentCode: "CB8366" }
-            console.log("Código actual recibido:", data.currentCode);
-            if (input === data.currentCode) {
-                document.getElementById('accessSection').classList.add('hidden');
-                document.getElementById('formContent').classList.remove('hidden');
-                document.getElementById('accessError').style.display = 'none';
-            } else {
-                document.getElementById('accessError').style.display = 'block';
-            }
-        } catch (err) {
-            console.error("Error obteniendo código:", err);
+// Obtener código actual
+async function fetchCurrentCode() {
+    try {
+        const response = await fetch(WEB_APP_URL);
+        const data = await response.json();
+        currentCode = data.currentCode;
+        console.log("Código actual recibido:", currentCode);
+    } catch (err) {
+        console.error("Error obteniendo código:", err);
+    }
+}
+
+// Verificar acceso
+function checkAccess() {
+    const input = document.getElementById("passwordInput").value.trim();
+    console.log("Contraseña ingresada:", input);
+
+    if (input === currentCode) {
+        document.getElementById("accessSection").classList.add("hidden");
+        document.getElementById("formContent").classList.remove("hidden");
+    } else {
+        document.getElementById("accessError").style.display = "block";
+    }
+}
+
+// Manejar envío del formulario
+document.getElementById("vehicleForm").addEventListener("submit", async function(e){
+    e.preventDefault();
+    const submitBtn = document.getElementById("submitBtn");
+    const messageDiv = document.getElementById("formMessage");
+
+    submitBtn.disabled = true;
+    submitBtn.innerText = "Cargando...";
+
+    const formData = {
+        nombre: document.getElementById("nombre").value,
+        nuim: document.getElementById("nuim").value,
+        telefono: document.getElementById("telefono").value,
+        marca: document.getElementById("marca").value,
+        modelo: document.getElementById("modelo").value,
+        color: document.getElementById("color").value,
+        matricula: document.getElementById("matricula").value
+    };
+
+    try {
+        const response = await fetch(WEB_APP_URL, {
+            method: "POST",
+            body: JSON.stringify(formData)
+        });
+        const result = await response.json();
+
+        if(result.success){
+            messageDiv.className = "message success";
+            messageDiv.innerText = "¡Registro enviado con éxito!";
+            messageDiv.style.display = "block";
+            document.getElementById("vehicleForm").reset();
+        } else {
+            messageDiv.className = "message error";
+            messageDiv.innerText = "Error: " + result.error;
+            messageDiv.style.display = "block";
         }
+    } catch(err) {
+        messageDiv.className = "message error";
+        messageDiv.innerText = "Error al enviar datos: " + err.message;
+        messageDiv.style.display = "block";
     }
 
-    // Enviar formulario
-    document.getElementById('vehicleForm').addEventListener('submit', async function(e){
-        e.preventDefault();
-        const btn = document.getElementById('submitBtn');
-        btn.disabled = true;
-        btn.innerText = "Cargando...";
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Registrar Vehículo';
+});
 
-        const formData = {
-            nombre: document.getElementById('nombre').value,
-            nuim: document.getElementById('nuim').value,
-            telefono: document.getElementById('telefono').value,
-            marca: document.getElementById('marca').value,
-            modelo: document.getElementById('modelo').value,
-            color: document.getElementById('color').value,
-            matricula: document.getElementById('matricula').value
-        };
-
-        try {
-            const res = await fetch(`${WEB_APP_URL}?action=submit`, {
-                method: 'POST',
-                body: JSON.stringify(formData),
-                headers: { 'Content-Type': 'application/json' }
-            });
-            const data = await res.json();
-            console.log("Respuesta del Web App:", data);
-
-            if (data.success) {
-                document.getElementById('message').innerText = "Registro enviado correctamente!";
-                document.getElementById('message').className = "message success";
-                document.getElementById('vehicleForm').reset();
-            } else {
-                document.getElementById('message').innerText = "Error al enviar registro.";
-                document.getElementById('message').className = "message error";
-            }
-        } catch(err) {
-            console.error("Error enviando datos:", err);
-            document.getElementById('message').innerText = "Error al enviar registro.";
-            document.getElementById('message').className = "message error";
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-paper-plane"></i> Registrar Vehículo';
-        }
-    });
+// Actualizar código al cargar
+fetchCurrentCode();
+setInterval(fetchCurrentCode, 30000); // actualizar cada 30s
 </script>
 
 </body>
