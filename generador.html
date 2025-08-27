@@ -59,82 +59,69 @@ Presiona "Generar" para crear una contraseña
 </div>
 
 <script>
-const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwjC9OvoHQOqksobwRntn-5GP-DsWLyzIo3SciHVnS5VhirVcdc0iitVKfezUiqH8FO/exec'; // reemplaza con tu URL de web app
-let currentPassword = 'LSAF2025';
+const WEBAPP_URL = "TU_WEBAPP_URL_AQUI"; // Reemplaza con tu URL real
+let currentPassword = "";
+
+function showMessage(msg, type="info") {
+  const m = document.getElementById("message");
+  m.textContent = msg;
+  m.style.color = type === "error" ? "red" : "green";
+  setTimeout(() => m.textContent="", 4000);
+}
 
 function loadPassword() {
-  return new Promise((resolve, reject) => {
-    const callbackName = 'cb_' + Math.random().toString(36).substring(2,15);
+  return new Promise((resolve) => {
+    const callbackName = "cb_" + Math.floor(Math.random()*1000000);
     window[callbackName] = function(data) {
       delete window[callbackName];
       document.body.removeChild(script);
-      if(data && data.password) resolve(data.password);
-      else resolve('LSAF2025');
+      currentPassword = data.password || "LSAF2025";
+      document.getElementById("passwordDisplay").textContent = currentPassword;
+      resolve(currentPassword);
     };
-    const script = document.createElement('script');
+    const script = document.createElement("script");
     script.src = `${WEBAPP_URL}?action=getPassword&callback=${callbackName}`;
-    script.onerror = () => { delete window[callbackName]; document.body.removeChild(script); resolve('LSAF2025'); };
     document.body.appendChild(script);
   });
 }
 
-function updatePassword(newPassword) {
+function updatePassword(newPass) {
   return new Promise((resolve, reject) => {
-    const callbackName = 'cb_' + Math.random().toString(36).substring(2,15);
+    const callbackName = "cb_" + Math.floor(Math.random()*1000000);
     window[callbackName] = function(data) {
       delete window[callbackName];
       document.body.removeChild(script);
-      if(data && data.success) resolve(data); else reject(new Error(data.error || 'Error desconocido'));
+      if (data.success) resolve(data.password);
+      else reject(data.error);
     };
-    const script = document.createElement('script');
-    script.src = `${WEBAPP_URL}?action=updatePassword&password=${encodeURIComponent(newPassword)}&callback=${callbackName}`;
-    script.onerror = () => { delete window[callbackName]; document.body.removeChild(script); reject(new Error('Error de conexión')); };
+    const script = document.createElement("script");
+    script.src = `${WEBAPP_URL}?action=updatePassword&password=${encodeURIComponent(newPass)}&callback=${callbackName}`;
     document.body.appendChild(script);
   });
-}
-
-window.onload = async function() {
-  document.getElementById('passwordDisplay').textContent = 'Cargando...';
-  currentPassword = await loadPassword();
-  document.getElementById('passwordDisplay').textContent = currentPassword;
-  showMessage('Contraseña cargada correctamente', 'success');
 }
 
 async function generatePassword() {
-  const btn = document.getElementById('generateBtn');
-  btn.innerHTML = '<span class="loading"></span> Generando...';
-  btn.disabled = true;
+  const randomNum = Math.floor(Math.random()*10000).toString().padStart(4,"0");
+  const newPass = "LSAF" + randomNum;
+  document.getElementById("passwordDisplay").textContent = newPass;
 
   try {
-    const num = Math.floor(Math.random()*10000).toString().padStart(4,'0');
-    const newPassword = `LSAF${num}`;
-    document.getElementById('passwordDisplay').textContent = newPassword;
-
-    await updatePassword(newPassword);
-    currentPassword = newPassword;
-    showMessage('¡Contraseña actualizada correctamente!', 'success');
-  } catch(err) {
-    showMessage('Error de conexión: '+err.message,'error');
-  } finally {
-    btn.innerHTML = '<i class="fas fa-key"></i> Generar Nueva Contraseña';
-    btn.disabled = false;
+    await updatePassword(newPass);
+    currentPassword = newPass;
+    showMessage("Contraseña actualizada correctamente", "success");
+  } catch (e) {
+    showMessage("Error al actualizar: " + e, "error");
   }
 }
 
 function copyPassword() {
-  if(!currentPassword) { showMessage('Primero genera una contraseña','error'); return; }
-  navigator.clipboard.writeText(currentPassword).then(() => {
-    showMessage('✓ Contraseña copiada: ' + currentPassword,'success');
-  }).catch(err => showMessage('Error al copiar: '+err.message,'error'));
+  navigator.clipboard.writeText(currentPassword)
+    .then(() => showMessage("Contraseña copiada: " + currentPassword, "success"))
+    .catch(() => showMessage("Error al copiar", "error"));
 }
 
-function showMessage(text,type){
-  const div = document.getElementById('message');
-  div.textContent = text;
-  div.className = 'message ' + type;
-  div.style.display='block';
-  setTimeout(()=>{ div.style.display='none'; }, 4000);
-}
+// Cargar contraseña actual al iniciar
+window.onload = loadPassword;
 </script>
 </body>
 </html>
