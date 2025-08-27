@@ -154,71 +154,44 @@
     </div>
 
     <script>
-const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwuZVRDOgShaXoDpfNKEG6UvO9FQ_Uh0ULlV9XOvntESC_hR0Xslz-yadDb-CkRolR_/exec'; // tu Web App de Google Apps Script
-let ACTIVE_CODE = '';
+    // URL de tu Apps Script publicado como Web App
+    const SHEET_URL = "https://script.google.com/macros/s/AKfycbwuZVRDOgShaXoDpfNKEG6UvO9FQ_Uh0ULlV9XOvntESC_hR0Xslz-yadDb-CkRolR_/exec";
+    let ACTIVE_CODE = "";
 
-// Consultar contraseña actual
-function fetchCurrentCode() {
-  return new Promise((resolve) => {
-    window.callback = (data) => {
+    // === Cargar el código actual desde Google Sheets ===
+    function fetchCurrentCode() {
+      const script = document.createElement("script");
+      script.src = SHEET_URL + "?callback=setCode&t=" + new Date().getTime();
+      document.body.appendChild(script);
+    }
+
+    // === Callback JSONP ===
+    function setCode(data) {
       ACTIVE_CODE = data.currentCode;
-      console.log("Código recibido:", ACTIVE_CODE); // ✅ muestra el código correcto
-      resolve();
-    };
+      console.log("Código actual recibido:", ACTIVE_CODE);
+    }
 
-    // carga dinámica con cache-busting
-    let script = document.createElement("script");
-    script.src = "https://script.google.com/macros/s/TU_SCRIPT_ID/exec?callback=callback&t=" + new Date().getTime();
-    document.body.appendChild(script);
-  });
-}
-// Validar acceso
-async function checkAccess() {
-  await fetchCurrentCode();
-  const inputCode = document.getElementById("accessCode").value.trim();
+    // === Verificar acceso ===
+    function checkAccess() {
+      const input = document.getElementById("passwordInput").value.trim();
+      console.log("Contraseña ingresada:", input);
+      console.log("Contraseña válida:", ACTIVE_CODE);
 
-  if (inputCode === ACTIVE_CODE) {
-    console.log("✅ Acceso concedido");
-    document.getElementById("accessSection").style.display = "none";
-    document.getElementById("formSection").style.display = "block";
-  } else {
-    console.log("❌ Código inválido");
-    document.getElementById("accessError").textContent = "Código incorrecto, intente de nuevo.";
-  }
-}
+      if (input === ACTIVE_CODE) {
+        document.getElementById("formulario").style.display = "block";
+        document.getElementById("accessError").textContent = "";
+      } else {
+        document.getElementById("formulario").style.display = "none";
+        document.getElementById("accessError").textContent = "Contraseña incorrecta";
+      }
+    }
 
-// Enviar formulario
-const form = document.getElementById('vehicleForm');
-form.addEventListener('submit', async (e)=>{
-  e.preventDefault();
-  const data = {
-    nombre: document.getElementById('nombre').value,
-    nuim: document.getElementById('nuim').value,
-    telefono: document.getElementById('telefono').value,
-    marca: document.getElementById('marca').value,
-    modelo: document.getElementById('modelo').value,
-    color: document.getElementById('color').value,
-    matricula: document.getElementById('matricula').value
-  };
-  try {
-    await fetch(SHEET_URL, {
-      method:'POST',
-      body: JSON.stringify(data)
-    });
-    document.getElementById('message').textContent = '¡Vehículo registrado correctamente!';
-    form.reset();
-  } catch(err) {
-    document.getElementById('message').textContent = 'Error al registrar.';
-    console.error(err);
-  }
-});
-
-// Actualizar código en tiempo real cada 10s
-setInterval(fetchCurrentCode, 10000);
-
-</script>
+    // Llamar automáticamente al cargar la página
+    fetchCurrentCode();
+  </script>
 </body>
 </html>
+
 
 
 
