@@ -149,86 +149,96 @@
 </div>
 
 <script>
-const CURRENT_CODE_URL = "https://script.google.com/macros/s/AKfycbwuZVRDOgShaXoDpfNKEG6UvO9FQ_Uh0ULlV9XOvntESC_hR0Xslz-yadDb-CkRolR_/exec";
-const REGISTER_URL = CURRENT_CODE_URL;
+        const CURRENT_CODE_URL = "https://script.google.com/macros/s/AKfycbwuZVRDOgShaXoDpfNKEG6UvO9FQ_Uh0ULlV9XOvntESC_hR0Xslz-yadDb-CkRolR_/exec";
 
-const accessSection = document.getElementById("accessSection");
-const formContent = document.getElementById("formContent");
-const accessError = document.getElementById("accessError");
-const checkBtn = document.getElementById("checkBtn");
-const passwordInput = document.getElementById("passwordInput");
-const vehicleForm = document.getElementById("vehicleForm");
-const submitBtn = document.getElementById("submitBtn");
-const messageDiv = document.getElementById("message");
+        document.addEventListener("DOMContentLoaded", () => {
+            const checkBtn = document.getElementById("checkBtn");
+            const vehicleForm = document.getElementById("vehicleForm");
+            const passwordInput = document.getElementById("passwordInput");
+            const accessError = document.getElementById("accessError");
+            const accessSection = document.getElementById("accessSection");
+            const formContent = document.getElementById("formContent");
+            const messageBox = document.getElementById("message");
+            const submitBtn = document.getElementById("submitBtn");
 
-async function checkPassword() {
-    accessError.style.display = "none";
-    const entered = passwordInput.value.trim();
-    if (!entered) return;
+            async function fetchCurrentCode() {
+                try {
+                    const res = await fetch(CURRENT_CODE_URL + "?callback=callback");
+                    const text = await res.text();
+                    const json = JSON.parse(text.replace(/^callback\(/, '').replace(/\);$/, ''));
+                    return json.currentCode;
+                } catch (err) {
+                    console.error("Error obteniendo código:", err);
+                    return null;
+                }
+            }
 
-    try {
-        const res = await fetch(CURRENT_CODE_URL);
-        const data = await res.json();
-        const currentCode = data.currentCode;
-        console.log("Código actual recibido:", currentCode);
-        console.log("Contraseña ingresada:", entered);
+            async function checkPassword() {
+                const entered = passwordInput.value.trim();
+                const currentCode = await fetchCurrentCode();
+                console.log("Contraseña ingresada:", entered);
+                console.log("Código actual recibido:", currentCode);
 
-        if (entered === currentCode) {
-            accessSection.classList.add("hidden");
-            formContent.classList.remove("hidden");
-        } else {
-            accessError.style.display = "block";
-        }
-    } catch (err) {
-        console.error("Error obteniendo código:", err);
-        accessError.style.display = "block";
-    }
-}
+                if (entered === currentCode) {
+                    accessSection.classList.add("hidden");
+                    formContent.classList.remove("hidden");
+                } else {
+                    accessError.classList.remove("hidden");
+                    setTimeout(() => accessError.classList.add("hidden"), 3000);
+                }
+            }
 
-checkBtn.addEventListener("click", checkPassword);
+            async function submitForm(e) {
+                e.preventDefault();
+                submitBtn.disabled = true;
+                submitBtn.textContent = "Cargando...";
 
-vehicleForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    submitBtn.disabled = true;
-    submitBtn.textContent = "Cargando...";
+                const formData = {
+                    nombre: document.getElementById("nombre").value,
+                    nuim: document.getElementById("nuim").value,
+                    telefono: document.getElementById("telefono").value,
+                    marca: document.getElementById("marca").value,
+                    modelo: document.getElementById("modelo").value,
+                    color: document.getElementById("color").value,
+                    matricula: document.getElementById("matricula").value
+                };
 
-    const data = {
-        nombre: document.getElementById("nombre").value,
-        nuim: document.getElementById("nuim").value,
-        telefono: document.getElementById("telefono").value,
-        marca: document.getElementById("marca").value,
-        modelo: document.getElementById("modelo").value,
-        color: document.getElementById("color").value,
-        matricula: document.getElementById("matricula").value
-    };
+                try {
+                    const res = await fetch(CURRENT_CODE_URL + "?method=addRegistro", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(formData)
+                    });
 
-    try {
-        const res = await fetch(REGISTER_URL, {
-            method: "POST",
-            body: JSON.stringify(data)
+                    const result = await res.json();
+                    if (result.status === "success") {
+                        messageBox.textContent = "Registro enviado con éxito!";
+                        messageBox.className = "message success";
+                        messageBox.style.display = "block";
+                        vehicleForm.reset();
+                    } else {
+                        messageBox.textContent = "Error al enviar registro.";
+                        messageBox.className = "message error";
+                        messageBox.style.display = "block";
+                    }
+                } catch (err) {
+                    console.error(err);
+                    messageBox.textContent = "Error al enviar registro.";
+                    messageBox.className = "message error";
+                    messageBox.style.display = "block";
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Registrar Vehículo';
+                }
+            }
+
+            checkBtn.addEventListener("click", checkPassword);
+            vehicleForm.addEventListener("submit", submitForm);
         });
-        const result = await res.json();
-
-        if (result.success) {
-            messageDiv.textContent = "¡Registro exitoso!";
-            messageDiv.className = "success";
-            vehicleForm.reset();
-        } else {
-            messageDiv.textContent = "Error: " + (result.error || "No se pudo registrar");
-            messageDiv.className = "error";
-        }
-    } catch (err) {
-        messageDiv.textContent = "Error al registrar: " + err.message;
-        messageDiv.className = "error";
-    } finally {
-        submitBtn.disabled = false;
-        submitBtn.textContent = "Registrar Vehículo";
-    }
-});
-</script>
-
+    </script>
 </body>
 </html>
+
 
 
 
