@@ -191,6 +191,13 @@ async function checkAccess() {
 document.getElementById("vehicleForm").addEventListener("submit", async function(e) {
     e.preventDefault();
 
+    const submitBtn = document.getElementById("submitBtn");
+    const originalText = submitBtn.innerHTML;
+
+    // Deshabilitar botón y mostrar cargando
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="loading-spinner"></span> Registrando...';
+
     const formData = {
         nombre: document.getElementById("nombre").value,
         nuim: document.getElementById("nuim").value,
@@ -221,9 +228,15 @@ document.getElementById("vehicleForm").addEventListener("submit", async function
         document.getElementById("message").className = "message error";
         document.getElementById("message").innerText = "Error de conexión al servidor.";
         console.error(err);
+    } finally {
+        // Habilitar el botón de nuevo y restaurar texto
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
     }
 });
+
 </script>
 
 </body>
 </html>
+
