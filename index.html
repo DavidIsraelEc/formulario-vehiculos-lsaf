@@ -162,15 +162,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Obtener el código actual del Google Apps Script
     async function fetchCurrentCode() {
-        try {
-            const res = await fetch(CURRENT_CODE_URL);
-            const json = await res.json();
-            return json.currentCode;
-        } catch (err) {
-            console.error("Error obteniendo código:", err);
-            return null;
-        }
+    try {
+        const res = await fetch(CURRENT_CODE_URL);
+        const json = await res.json(); // ya es JSON puro
+        return json.currentCode;
+    } catch (err) {
+        console.error("Error obteniendo código:", err);
+        return null;
     }
+}
 
     // Verificar contraseña
     async function checkPassword() {
@@ -239,6 +239,7 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 </body>
 </html>
+
 
 
 
