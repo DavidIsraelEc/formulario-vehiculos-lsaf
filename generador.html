@@ -3,67 +3,30 @@
 <head>
   <meta charset="UTF-8">
   <title>Generador de Contraseña</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      background: #0d1117;
-      color: #fff;
-      padding: 40px;
-    }
-    .card {
-      background: #161b22;
-      padding: 30px;
-      border-radius: 12px;
-      display: inline-block;
-      box-shadow: 0px 4px 10px rgba(0,0,0,0.5);
-    }
-    button {
-      padding: 10px 20px;
-      margin: 10px;
-      border: none;
-      border-radius: 6px;
-      background: #238636;
-      color: #fff;
-      cursor: pointer;
-    }
-    button:hover { background: #2ea043; }
-    .password {
-      font-size: 22px;
-      margin: 20px 0;
-      color: #58a6ff;
-    }
-    .msg { margin-top: 15px; font-size: 14px; }
-  </style>
 </head>
 <body>
-  <div class="card">
-    <h2>🔐 Generador de Contraseña Única</h2>
-    <div id="password" class="password">---</div>
-    <button onclick="generatePassword()">Generar Nueva</button>
-    <button onclick="copyPassword()">Copiar</button>
-    <div class="msg" id="msg"></div>
-  </div>
+  <h2>🔐 Generador de Contraseña</h2>
+  <div id="password">---</div>
+  <button onclick="generatePassword()">Generar Nueva</button>
+  <button onclick="copyPassword()">Copiar</button>
+  <div id="msg"></div>
 
   <script>
-    const url = "https://script.google.com/macros/s/AKfycbwjC9OvoHQOqksobwRntn-5GP-DsWLyzIo3SciHVnS5VhirVcdc0iitVKfezUiqH8FO/exec"; // pega aquí tu URL del WebApp
+    const url = "YOUR_SCRIPT_URL"; // pega aquí la URL del WebApp
 
     async function generatePassword() {
-      try {
-        const res = await fetch(url + "?action=generatePassword");
-        const data = await res.json();
-        document.getElementById("password").innerText = data.password;
-        document.getElementById("msg").innerText = "✅ Nueva contraseña generada";
-      } catch (e) {
-        document.getElementById("msg").innerText = "❌ Error de conexión";
-      }
+      const res = await fetch(url + "?action=generate");
+      const data = await res.json();
+      document.getElementById("password").innerText = data.password;
+      document.getElementById("msg").innerText = "✅ Generada con éxito";
     }
 
     function copyPassword() {
       const pass = document.getElementById("password").innerText;
       navigator.clipboard.writeText(pass);
-      document.getElementById("msg").innerText = "📋 Contraseña copiada: " + pass;
+      document.getElementById("msg").innerText = "📋 Copiada: " + pass;
     }
   </script>
 </body>
 </html>
+
