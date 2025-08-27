@@ -160,17 +160,22 @@ let ACTIVE_CODE = '';
 // Consultar contraseña actual
 async function fetchCurrentCode() {
   try {
-    const res = await fetch(SHEET_URL);
-    const data = await res.json();
+    const res = await fetch(SHEET_URL + "?t=" + new Date().getTime()); // evita cache
+    if (!res.ok) throw new Error("Error en la respuesta");
+    const text = await res.text();
+    const data = JSON.parse(text);
     ACTIVE_CODE = data.currentCode;
+    console.log("Código actual:", ACTIVE_CODE);
   } catch(err) {
     console.error('Error obteniendo código:', err);
+    document.getElementById('accessError').textContent = 'No se pudo verificar el código. Revisa la consola.';
   }
 }
 
+
 // Validar acceso
 async function checkAccess() {
-  await fetchCurrentCode();
+  await fetchCurrentCode(); // obtiene código actualizado
   const code = document.getElementById('accessCode').value.trim();
   if(code === ACTIVE_CODE) {
     document.getElementById('accessSection').classList.add('hidden');
@@ -179,6 +184,7 @@ async function checkAccess() {
     document.getElementById('accessError').textContent = 'Código incorrecto';
   }
 }
+
 
 // Enviar formulario
 const form = document.getElementById('vehicleForm');
@@ -212,5 +218,6 @@ setInterval(fetchCurrentCode, 10000);
 </script>
 </body>
 </html>
+
 
 
