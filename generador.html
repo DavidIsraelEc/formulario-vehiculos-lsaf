@@ -6,122 +6,71 @@
 <title>Generador de Contraseñas - LSAF</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-/* Mantener todos tus estilos anteriores */
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+/* --- Mantenemos todo tu diseño anterior --- */
+* { box-sizing: border-box; margin:0; padding:0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
 body { background: linear-gradient(135deg, #1a4d79 0%, #0d2c46 100%); min-height:100vh; display:flex; justify-content:center; align-items:center; padding:20px; }
-.container { background-color:white; border-radius:15px; box-shadow:0 10px 30px rgba(0,0,0,.2); width:100%; max-width:500px; overflow:hidden; text-align:center; padding:30px; }
-.logo { width:80px; height:80px; border-radius:50%; background-color:white; padding:10px; box-shadow:0 0 15px rgba(0,0,0,.2); margin:0 auto 20px; }
+.container { background:white; border-radius:15px; box-shadow:0 10px 30px rgba(0,0,0,.2); width:100%; max-width:500px; overflow:hidden; text-align:center; padding:30px; }
+.logo { width:80px; height:80px; border-radius:50%; background:white; padding:10px; box-shadow:0 0 15px rgba(0,0,0,.2); margin:0 auto 20px; }
 h1 { color:#2c3e50; margin-bottom:10px; }
 p { color:#666; margin-bottom:20px; }
 .password-display { background:#f8f9fa; border:2px dashed #0056b3; border-radius:8px; padding:20px; margin:20px 0; font-size:24px; font-weight:bold; color:#0056b3; letter-spacing:2px; }
-button { background:linear-gradient(135deg,#28a745 0%,#20c997 100%); color:white; border:none; padding:16px; font-size:18px; border-radius:8px; cursor:pointer; width:100%; font-weight:600; transition:all 0.3s; margin:10px 0; }
-button:hover { background:linear-gradient(135deg,#218838 0%,#1e9e8a 100%); transform:translateY(-2px); }
+button { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color:white; border:none; padding:16px; font-size:18px; border-radius:8px; cursor:pointer; width:100%; font-weight:600; transition:all .3s; margin:10px 0; }
+button:hover { background: linear-gradient(135deg,#218838 0%,#1e9e8a 100%); transform:translateY(-2px);}
 .copy-btn { background: linear-gradient(135deg,#0056b3 0%,#003a75 100%); }
-.instructions { background-color:#e8f4ff; border-left:4px solid #0056b3; padding:15px; margin:20px 0; border-radius:4px; text-align:left; font-size:14px; }
-.instructions h3 { margin-top:0; color:#0056b3; }
 .message { padding:15px; margin:20px 0; border-radius:8px; display:none; }
 .success { background-color:#d4edda; color:#155724; border:1px solid #c3e6cb; }
 .error { background-color:#f8d7da; color:#721c24; border:1px solid #f5c6cb; }
 .info { background-color:#e8f4ff; color:#004085; border:1px solid #b8daff; }
-.loading { display:inline-block; width:20px; height:20px; border:3px solid rgba(255,255,255,.3); border-radius:50%; border-top-color:#fff; animation:spin 1s ease-in-out infinite; margin-right:10px; }
-@keyframes spin { to { transform:rotate(360deg); } }
 </style>
 </head>
 <body>
 <div class="container">
-<img src="https://i.imgur.com/fHV1Qo1.png" alt="Logo LSAF" class="logo">
-<h1>Generador de Contraseñas LSAF</h1>
-<p>Genera contraseñas para el sistema de registro vehicular</p>
-
-<div class="password-display" id="passwordDisplay">
-Presiona "Generar" para crear una contraseña
-</div>
-
-<button onclick="generatePassword()" id="generateBtn">
-<i class="fas fa-key"></i> Generar Nueva Contraseña
-</button>
-
-<button class="copy-btn" onclick="copyPassword()" id="copyBtn">
-<i class="fas fa-copy"></i> Copiar Contraseña
-</button>
-
-<div id="message" class="message"></div>
-
-<div class="instructions">
-<h3><i class="fas fa-info-circle"></i> Instrucciones:</h3>
-<ol>
-<li>Genera una contraseña con el botón "Generar"</li>
-<li>Copia la contraseña con "Copiar"</li>
-<li>Comparte la contraseña con quien necesita registrar un vehículo</li>
-<li>La contraseña anterior se invalidará automáticamente</li>
-</ol>
-</div>
+  <img src="https://i.imgur.com/fHV1Qo1.png" alt="Logo LSAF" class="logo">
+  <h1>Generador de Contraseñas LSAF</h1>
+  <p>Genera contraseñas para el sistema de registro vehicular</p>
+  <div class="password-display" id="passwordDisplay">Presiona "Generar" para crear una contraseña</div>
+  <button onclick="generatePassword()" id="generateBtn"><i class="fas fa-key"></i> Generar Nueva Contraseña</button>
+  <button class="copy-btn" onclick="copyPassword()" id="copyBtn"><i class="fas fa-copy"></i> Copiar Contraseña</button>
+  <div id="message" class="message"></div>
 </div>
 
 <script>
-const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwjC9OvoHQOqksobwRntn-5GP-DsWLyzIo3SciHVnS5VhirVcdc0iitVKfezUiqH8FO/exec"; // Reemplaza con tu URL real
-let currentPassword = "";
+const WEBAPP_URL = 'TU_WEBAPP_URL_AQUI'; // reemplazar por tu URL de Google Apps Script
+let currentPassword = '';
 
-function showMessage(msg, type="info") {
-  const m = document.getElementById("message");
-  m.textContent = msg;
-  m.style.color = type === "error" ? "red" : "green";
-  setTimeout(() => m.textContent="", 4000);
+function showMessage(text,type){
+  const msg=document.getElementById('message');
+  msg.textContent=text;
+  msg.className='message '+type;
+  msg.style.display='block';
+  setTimeout(()=>{msg.style.display='none';},4000);
 }
 
-function loadPassword() {
-  return new Promise((resolve) => {
-    const callbackName = "cb_" + Math.floor(Math.random()*1000000);
-    window[callbackName] = function(data) {
-      delete window[callbackName];
-      document.body.removeChild(script);
-      currentPassword = data.password || "LSAF2025";
-      document.getElementById("passwordDisplay").textContent = currentPassword;
-      resolve(currentPassword);
-    };
-    const script = document.createElement("script");
-    script.src = `${WEBAPP_URL}?action=getPassword&callback=${callbackName}`;
-    document.body.appendChild(script);
-  });
+function generatePassword(){
+  const btn=document.getElementById('generateBtn');
+  btn.disabled=true; btn.textContent='Generando...';
+  const randomNum=Math.floor(Math.random()*9000+1000);
+  const newPass='LSAF'+randomNum;
+  document.getElementById('passwordDisplay').textContent=newPass;
+  currentPassword=newPass;
+
+  // Guardar en Sheet vía WebApp
+  fetch(`${WEBAPP_URL}?action=setPassword&password=${newPass}`)
+    .then(r=>r.json())
+    .then(data=>{
+      if(data.success) showMessage('¡Contraseña actualizada!', 'success');
+      else showMessage('Error al actualizar: '+data.error,'error');
+    })
+    .catch(e=>{console.error(e); showMessage('Error de conexión','error');})
+    .finally(()=>{btn.disabled=false; btn.innerHTML='<i class="fas fa-key"></i> Generar Nueva Contraseña';});
 }
 
-function updatePassword(newPass) {
-  return new Promise((resolve, reject) => {
-    const callbackName = "cb_" + Math.floor(Math.random()*1000000);
-    window[callbackName] = function(data) {
-      delete window[callbackName];
-      document.body.removeChild(script);
-      if (data.success) resolve(data.password);
-      else reject(data.error);
-    };
-    const script = document.createElement("script");
-    script.src = `${WEBAPP_URL}?action=updatePassword&password=${encodeURIComponent(newPass)}&callback=${callbackName}`;
-    document.body.appendChild(script);
-  });
-}
-
-async function generatePassword() {
-  const randomNum = Math.floor(Math.random()*10000).toString().padStart(4,"0");
-  const newPass = "LSAF" + randomNum;
-  document.getElementById("passwordDisplay").textContent = newPass;
-
-  try {
-    await updatePassword(newPass);
-    currentPassword = newPass;
-    showMessage("Contraseña actualizada correctamente", "success");
-  } catch (e) {
-    showMessage("Error al actualizar: " + e, "error");
-  }
-}
-
-function copyPassword() {
+function copyPassword(){
+  if(!currentPassword){ showMessage('Primero genera una contraseña','error'); return; }
   navigator.clipboard.writeText(currentPassword)
-    .then(() => showMessage("Contraseña copiada: " + currentPassword, "success"))
-    .catch(() => showMessage("Error al copiar", "error"));
+    .then(()=>showMessage('✓ Copiada: '+currentPassword,'success'))
+    .catch(()=>showMessage('Error al copiar','error'));
 }
-
-// Cargar contraseña actual al iniciar
-window.onload = loadPassword;
 </script>
 </body>
 </html>
