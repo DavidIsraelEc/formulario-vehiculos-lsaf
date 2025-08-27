@@ -256,46 +256,75 @@
 
         // Función principal para generar contraseña
         async function generatePassword() {
-            const generateBtn = document.getElementById('generateBtn');
-            const messageDiv = document.getElementById('message');
-            
-            generateBtn.innerHTML = '<span class="loading"></span> Generando...';
-            generateBtn.disabled = true;
-            
-            try {
-                const randomNum = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-                const newPassword = `LSAF${randomNum}`;
-                
-                // Mostrar inmediatamente para feedback visual
-                document.getElementById('passwordDisplay').textContent = newPassword;
-                
-                // Intentar actualizar con JSONP
-                await updatePasswordWithJSONP(newPassword);
-                
-                currentPassword = newPassword;
-                showMessage('¡Contraseña actualizada correctamente!', 'success');
-                
-            } catch (error) {
-                console.error('Error al actualizar:', error);
-                
-                // Verificar si de todas formas se actualizó en el servidor
-                try {
-                    const verifiedPassword = await loadPasswordWithJSONP();
-                    if (verifiedPassword.startsWith('LSAF')) {
-                        currentPassword = verifiedPassword;
-                        document.getElementById('passwordDisplay').textContent = currentPassword;
-                        showMessage('Contraseña actualizada (verificación retrasada)', 'success');
-                    } else {
-                        showMessage('Error: ' + error.message, 'error');
-                    }
-                } catch (verifyError) {
-                    showMessage('Error de conexión: ' + error.message, 'error');
-                }
-            } finally {
-                generateBtn.innerHTML = '<i class="fas fa-key"></i> Generar Nueva Contraseña';
-                generateBtn.disabled = false;
-            }
+    const generateBtn = document.getElementById('generateBtn');
+    const messageDiv = document.getElementById('message');
+    
+    generateBtn.innerHTML = '<span class="loading"></span> Generando...';
+    generateBtn.disabled = true;
+    
+    try {
+        const randomNum = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+        const newPassword = `LSAF${randomNum}`;
+        
+        // Mostrar inmediatamente para feedback visual
+        document.getElementById('passwordDisplay').textContent = newPassword;
+        
+        // Enviar solicitud usando JSON
+        const response = await fetch(SCRIPT_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: 'updatePassword',
+                password: newPassword,
+                forceUpdate: true // Nuevo parámetro para forzar actualización
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Error HTTP: ${response.status} ${response.statusText}`);
         }
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            currentPassword = newPassword;
+            showMessage('¡Contraseña actualizada correctamente!', 'success');
+            
+            // Forzar actualización inmediata en todos los dispositivos
+            await forcePasswordRefresh();
+            
+        } else {
+            showMessage('Error al actualizar: ' + (result.error || 'Error desconocido'), 'error');
+        }
+    } catch (error) {
+        console.error('Error completo:', error);
+        showMessage('Error de conexión: ' + error.message, 'error');
+    } finally {
+        generateBtn.innerHTML = '<i class="fas fa-key"></i> Generar Nueva Contraseña';
+        generateBtn.disabled = false;
+    }
+}
+
+// Función para forzar actualización en todos los dispositivos
+async function forcePasswordRefresh() {
+    try {
+        // Enviar señal de actualización a todos los clientes
+        await fetch(SCRIPT_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: 'notifyPasswordChange',
+                timestamp: Date.now()
+            })
+        });
+    } catch (error) {
+        console.log('Error al notificar cambio (no crítico):', error);
+    }
+}
 
         function copyPassword() {
             if (!currentPassword) {
