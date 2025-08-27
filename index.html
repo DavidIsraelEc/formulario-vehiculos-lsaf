@@ -174,24 +174,37 @@
 
     // === Verificar acceso ===
     function checkAccess() {
-      const input = document.getElementById("passwordInput").value.trim();
-      console.log("Contraseña ingresada:", input);
-      console.log("Contraseña válida:", ACTIVE_CODE);
+  const inputPassword = document.getElementById("passwordInput").value;
+  console.log("Contraseña ingresada:", inputPassword);
 
-      if (input === ACTIVE_CODE) {
-        document.getElementById("formulario").style.display = "block";
-        document.getElementById("accessError").textContent = "";
+  google.script.run
+    .withSuccessHandler(function(response) {
+      console.log("Contraseña válida:", response);
+
+      if (response === inputPassword) {
+        // Ocultar pantalla de acceso
+        document.getElementById("accessSection").style.display = "none";
+        // Mostrar formulario
+        document.getElementById("formContent").style.display = "block";
       } else {
-        document.getElementById("formulario").style.display = "none";
-        document.getElementById("accessError").textContent = "Contraseña incorrecta";
+        // Mostrar mensaje de error
+        document.getElementById("accessError").style.display = "block";
       }
-    }
+    })
+    .withFailureHandler(function(err) {
+      console.error("Error en la verificación:", err);
+      document.getElementById("accessError").style.display = "block";
+    })
+    .getAccessCode(); // tu función en Apps Script
+}
+
 
     // Llamar automáticamente al cargar la página
     fetchCurrentCode();
   </script>
 </body>
 </html>
+
 
 
 
