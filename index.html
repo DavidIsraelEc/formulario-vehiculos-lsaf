@@ -158,32 +158,40 @@ const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwuZVRDOgShaXoDpfNKEG
 let ACTIVE_CODE = '';
 
 // Consultar contraseña actual
+let ACTIVE_CODE = ""; // variable global
+
 async function fetchCurrentCode() {
   try {
     const res = await fetch(SHEET_URL + "?t=" + new Date().getTime()); // evita cache
-    if (!res.ok) throw new Error("Error en la respuesta");
     const text = await res.text();
+    console.log("Respuesta cruda:", text); // 👀 para ver qué devuelve GAS
     const data = JSON.parse(text);
     ACTIVE_CODE = data.currentCode;
-    console.log("Código actual:", ACTIVE_CODE);
+    console.log("Código actual recibido:", ACTIVE_CODE);
   } catch(err) {
-    console.error('Error obteniendo código:', err);
-    document.getElementById('accessError').textContent = 'No se pudo verificar el código. Revisa la consola.';
+    console.error("Error obteniendo código:", err);
+    document.getElementById('accessError').textContent = "Error al obtener el código.";
   }
 }
+
 
 
 // Validar acceso
 async function checkAccess() {
-  await fetchCurrentCode(); // obtiene código actualizado
+  await fetchCurrentCode(); // 👈 garantiza que ACTIVE_CODE se actualice
+
   const code = document.getElementById('accessCode').value.trim();
-  if(code === ACTIVE_CODE) {
+  console.log("Código ingresado:", code);
+  console.log("Código esperado:", ACTIVE_CODE);
+
+  if (code === ACTIVE_CODE) {
     document.getElementById('accessSection').classList.add('hidden');
     document.getElementById('formContent').classList.remove('hidden');
   } else {
-    document.getElementById('accessError').textContent = 'Código incorrecto';
+    document.getElementById('accessError').textContent = "Código incorrecto";
   }
 }
+
 
 
 // Enviar formulario
@@ -218,6 +226,7 @@ setInterval(fetchCurrentCode, 10000);
 </script>
 </body>
 </html>
+
 
 
 
