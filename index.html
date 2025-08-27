@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Acceso</title>
+</head>
+<body>
+  <h2>🔑 Acceso</h2>
+  <input type="password" id="password" placeholder="Ingrese contraseña">
+  <button onclick="verifyAccess()">Entrar</button>
+  <div id="msg"></div>
+
+  <script>
+    const url = "https://script.google.com/macros/s/AKfycbwjC9OvoHQOqksobwRntn-5GP-DsWLyzIo3SciHVnS5VhirVcdc0iitVKfezUiqH8FO/exec"; // pega aquí la URL del WebApp
+
+    async function verifyAccess() {
+      const pass = document.getElementById("password").value;
+      const res = await fetch(url + "?action=verify&password=" + encodeURIComponent(pass));
+      const data = await res.json();
+
+      if (data.success) {
+        document.getElementById("msg").innerText = "✅ Acceso concedido";
+        window.location.href = "FORMULARIO.html"; // cámbialo a tu página interna
+      } else {
+        document.getElementById("msg").innerText = "❌ Contraseña incorrecta o usada";
+      }
+    }
+  </script>
+</body>
+</html>
