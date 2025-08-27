@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generador de Contraseñas - LSAF</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+/* --- TODO TU CSS EXISTENTE --- */
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif}
+body{background:linear-gradient(135deg,#1a4d79 0%,#0d2c46 100%);min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px}
+.container{background-color:white;border-radius:15px;box-shadow:0 10px 30px rgba(0,0,0,.2);width:100%;max-width:500px;overflow:hidden;text-align:center;padding:30px}
+.logo{width:80px;height:80px;border-radius:50%;background-color:white;padding:10px;box-shadow:0 0 15px rgba(0,0,0,.2);margin:0 auto 20px}
+/* ... resto de tu CSS ... */
+</style>
+</head>
+<body>
+
+<div class="container">
+<img src="https://i.imgur.com/fHV1Qo1.png" class="logo">
+<h1>Generador de Contraseñas LSAF</h1>
+<div>
+<input type="text" id="newPassword" placeholder="Presiona Generar" readonly>
+</div>
+<button onclick="generatePassword()"><i class="fas fa-key"></i> Generar Nueva Contraseña</button>
+<button onclick="copyPassword()"><i class="fas fa-copy"></i> Copiar Contraseña</button>
+</div>
+
+<script>
+const WEBAPP_URL='https://script.google.com/macros/s/AKfycbwjC9OvoHQOqksobwRntn-5GP-DsWLyzIo3SciHVnS5VhirVcdc0iitVKfezUiqH8FO/exec';
+const passwordField=document.getElementById('newPassword');
+
+function generateRandomPassword(){
+  const chars='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let pass=''; for(let i=0;i<8;i++){pass+=chars.charAt(Math.floor(Math.random()*chars.length));}
+  return 'LSAF'+pass;
+}
+
+function generatePassword(){
+  const newPass=generateRandomPassword();
+  const cb='cb'+Math.random().toString(36).substr(2,5);
+  window[cb]=function(data){delete window[cb]; script.remove(); passwordField.value=newPass; alert('Contraseña generada: '+newPass);}
+  const script=document.createElement('script');
+  script.src=`${WEBAPP_URL}?action=setPassword&password=${newPass}&callback=${cb}`;
+  document.body.appendChild(script);
+}
+
+function copyPassword(){
+  if(!passwordField.value){alert('Primero genera una contraseña'); return;}
+  navigator.clipboard.writeText(passwordField.value).then(()=>alert('Contraseña copiada: '+passwordField.value));
+}
+</script>
+
+</body>
+</html>
