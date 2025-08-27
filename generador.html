@@ -57,7 +57,6 @@
             font-weight: bold;
             color: #0056b3;
             letter-spacing: 2px;
-            word-break: break-all;
         }
         button {
             background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
@@ -108,20 +107,18 @@
             color: #721c24;
             border: 1px solid #f5c6cb;
         }
-        .history {
-            margin-top: 20px;
-            text-align: left;
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
         }
-        .history h3 {
-            color: #2c3e50;
-            margin-bottom: 10px;
-        }
-        .history-list {
-            max-height: 150px;
-            overflow-y: auto;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 10px;
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -135,62 +132,60 @@
             Presiona "Generar" para crear una contraseña
         </div>
         
-        <button onclick="generatePassword()">
+        <button onclick="generatePassword()" id="generateBtn">
             <i class="fas fa-key"></i> Generar Nueva Contraseña
         </button>
         
-        <button class="copy-btn" onclick="copyPassword()">
+        <button class="copy-btn" onclick="copyPassword()" id="copyBtn">
             <i class="fas fa-copy"></i> Copiar Contraseña
         </button>
         
         <div id="message" class="message"></div>
         
         <div class="instructions">
-            <h3><i class="fas fa-info-circle"></i> Instrucciones de uso:</h3>
+            <h3><i class="fas fa-info-circle"></i> Instrucciones:</h3>
             <ol>
-                <li>Genera una nueva contraseña con el botón "Generar"</li>
-                <li>Copia la contraseña con el botón "Copiar"</li>
-                <li>Comparte esta contraseña con la persona que necesita registrar su vehículo</li>
-                <li>La contraseña anterior dejará de funcionar automáticamente</li>
+                <li>Genera una contraseña con el botón "Generar"</li>
+                <li>Copia la contraseña con "Copiar"</li>
+                <li>Comparte la contraseña con quien necesita registrar un vehículo</li>
+                <li>La contraseña anterior se invalidará automáticamente</li>
             </ol>
-        </div>
-        
-        <div class="history">
-            <h3><i class="fas fa-history"></i> Historial de Contraseñas</h3>
-            <div class="history-list" id="passwordHistory">
-                No hay contraseñas generadas aún
-            </div>
         </div>
     </div>
 
     <script>
-        // Almacenamiento de contraseñas
-        const STORAGE_KEY = 'lsaf_passwords';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwZ9QKJ6fa8Z6sySry5AHmpeha1uIRuSHejuraVHU_tZXmBO7fuWsVQ-JrxE4yJQAdb/exec';
         let currentPassword = '';
-        
-        // Cargar historial al iniciar
-        window.onload = function() {
-            loadPasswordHistory();
-            // Generar una contraseña automáticamente al cargar
-            generatePassword();
-        };
-        
-        function generatePassword() {
-            // Generar número aleatorio de 4 dígitos (0000-9999)
-            const randomNum = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-            currentPassword = `LSAF${randomNum}`;
+
+        async function generatePassword() {
+            const generateBtn = document.getElementById('generateBtn');
+            const messageDiv = document.getElementById('message');
             
-            // Mostrar la contraseña
-            document.getElementById('passwordDisplay').textContent = currentPassword;
-            document.getElementById('message').style.display = 'none';
+            generateBtn.innerHTML = '<span class="loading"></span> Generando...';
+            generateBtn.disabled = true;
             
-            // Guardar en el historial
-            saveToHistory(currentPassword);
-            
-            // Actualizar el formulario principal (esto requiere una modificación mínima)
-            updateMainFormPassword(currentPassword);
+            try {
+                const randomNum = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+                const newPassword = `LSAF${randomNum}`;
+                
+                const response = await fetch(`${SCRIPT_URL}?action=updatePassword&password=${newPassword}`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    currentPassword = newPassword;
+                    document.getElementById('passwordDisplay').textContent = currentPassword;
+                    showMessage('Contraseña actualizada correctamente', 'success');
+                } else {
+                    showMessage('Error al actualizar la contraseña', 'error');
+                }
+            } catch (error) {
+                showMessage('Error de conexión', 'error');
+            } finally {
+                generateBtn.innerHTML = '<i class="fas fa-key"></i> Generar Nueva Contraseña';
+                generateBtn.disabled = false;
+            }
         }
-        
+
         function copyPassword() {
             if (!currentPassword) {
                 showMessage('Primero genera una contraseña', 'error');
@@ -199,10 +194,9 @@
             
             navigator.clipboard.writeText(currentPassword)
                 .then(() => {
-                    showMessage('Contraseña copiada al portapapeles: ' + currentPassword, 'success');
+                    showMessage('Contraseña copiada: ' + currentPassword, 'success');
                 })
                 .catch(err => {
-                    // Fallback para navegadores antiguos
                     const tempTextArea = document.createElement('textarea');
                     tempTextArea.value = currentPassword;
                     document.body.appendChild(tempTextArea);
@@ -212,83 +206,32 @@
                     showMessage('Contraseña copiada: ' + currentPassword, 'success');
                 });
         }
-        
-        function saveToHistory(password) {
-            // Obtener historial existente
-            let history = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-            
-            // Agregar nueva contraseña con timestamp
-            history.unshift({
-                password: password,
-                timestamp: new Date().toLocaleString('es-ES')
-            });
-            
-            // Mantener solo las últimas 10 contraseñas
-            if (history.length > 10) {
-                history = history.slice(0, 10);
-            }
-            
-            // Guardar en localStorage
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
-            
-            // Actualizar visualización
-            loadPasswordHistory();
-        }
-        
-        function loadPasswordHistory() {
-            const history = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-            const historyElement = document.getElementById('passwordHistory');
-            
-            if (history.length === 0) {
-                historyElement.innerHTML = 'No hay contraseñas generadas aún';
-                return;
-            }
-            
-            historyElement.innerHTML = history.map(item => 
-                `<div style="margin-bottom: 8px; padding: 5px; border-bottom: 1px solid #eee;">
-                    <strong>${item.password}</strong> 
-                    <span style="font-size: 12px; color: #666;">(${item.timestamp})</span>
-                </div>`
-            ).join('');
-        }
-        
-        function updateMainFormPassword(newPassword) {
-            // Esta función intenta actualizar el formulario principal
-            // Nota: Esto requiere que ambos archivos estén en el mismo dominio
-            try {
-                // Guardar en localStorage para que el formulario principal lo detecte
-                localStorage.setItem('lsaf_current_password', newPassword);
-                
-                // También intentar actualizar directamente si está en la misma pestaña
-                if (window.opener) {
-                    window.opener.postMessage({
-                        type: 'UPDATE_PASSWORD',
-                        password: newPassword
-                    }, '*');
-                }
-            } catch (error) {
-                console.log('El formulario principal se actualizará en el próximo acceso');
-            }
-        }
-        
+
         function showMessage(text, type) {
             const messageDiv = document.getElementById('message');
             messageDiv.textContent = text;
             messageDiv.className = 'message ' + type;
             messageDiv.style.display = 'block';
             
-            // Ocultar mensaje después de 3 segundos
             setTimeout(() => {
                 messageDiv.style.display = 'none';
             }, 3000);
         }
-        
-        // Escuchar mensajes desde el formulario principal
-        window.addEventListener('message', function(event) {
-            if (event.data.type === 'REQUEST_PASSWORD') {
-                generatePassword();
-            }
-        });
+
+        window.onload = function() {
+            // Cargar contraseña actual al iniciar
+            fetch(`${SCRIPT_URL}?action=getPassword`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.password) {
+                        currentPassword = data.password;
+                        document.getElementById('passwordDisplay').textContent = currentPassword;
+                    }
+                })
+                .catch(error => {
+                    console.log('Error al cargar contraseña:', error);
+                });
+        };
     </script>
 </body>
 </html>
