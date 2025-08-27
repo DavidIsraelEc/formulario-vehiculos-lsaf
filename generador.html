@@ -1,55 +1,69 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Generador de Contraseñas - LSAF</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<style>
-/* --- TODO TU CSS EXISTENTE --- */
-*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif}
-body{background:linear-gradient(135deg,#1a4d79 0%,#0d2c46 100%);min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px}
-.container{background-color:white;border-radius:15px;box-shadow:0 10px 30px rgba(0,0,0,.2);width:100%;max-width:500px;overflow:hidden;text-align:center;padding:30px}
-.logo{width:80px;height:80px;border-radius:50%;background-color:white;padding:10px;box-shadow:0 0 15px rgba(0,0,0,.2);margin:0 auto 20px}
-/* ... resto de tu CSS ... */
-</style>
+  <meta charset="UTF-8">
+  <title>Generador de Contraseña</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #0d1117;
+      color: #fff;
+      padding: 40px;
+    }
+    .card {
+      background: #161b22;
+      padding: 30px;
+      border-radius: 12px;
+      display: inline-block;
+      box-shadow: 0px 4px 10px rgba(0,0,0,0.5);
+    }
+    button {
+      padding: 10px 20px;
+      margin: 10px;
+      border: none;
+      border-radius: 6px;
+      background: #238636;
+      color: #fff;
+      cursor: pointer;
+    }
+    button:hover { background: #2ea043; }
+    .password {
+      font-size: 22px;
+      margin: 20px 0;
+      color: #58a6ff;
+    }
+    .msg { margin-top: 15px; font-size: 14px; }
+  </style>
 </head>
 <body>
+  <div class="card">
+    <h2>🔐 Generador de Contraseña Única</h2>
+    <div id="password" class="password">---</div>
+    <button onclick="generatePassword()">Generar Nueva</button>
+    <button onclick="copyPassword()">Copiar</button>
+    <div class="msg" id="msg"></div>
+  </div>
 
-<div class="container">
-<img src="https://i.imgur.com/fHV1Qo1.png" class="logo">
-<h1>Generador de Contraseñas LSAF</h1>
-<div>
-<input type="text" id="newPassword" placeholder="Presiona Generar" readonly>
-</div>
-<button onclick="generatePassword()"><i class="fas fa-key"></i> Generar Nueva Contraseña</button>
-<button onclick="copyPassword()"><i class="fas fa-copy"></i> Copiar Contraseña</button>
-</div>
+  <script>
+    const url = "https://script.google.com/macros/s/AKfycbwjC9OvoHQOqksobwRntn-5GP-DsWLyzIo3SciHVnS5VhirVcdc0iitVKfezUiqH8FO/exec"; // pega aquí tu URL del WebApp
 
-<script>
-const WEBAPP_URL='https://script.google.com/macros/s/AKfycbwjC9OvoHQOqksobwRntn-5GP-DsWLyzIo3SciHVnS5VhirVcdc0iitVKfezUiqH8FO/exec';
-const passwordField=document.getElementById('newPassword');
+    async function generatePassword() {
+      try {
+        const res = await fetch(url + "?action=generatePassword");
+        const data = await res.json();
+        document.getElementById("password").innerText = data.password;
+        document.getElementById("msg").innerText = "✅ Nueva contraseña generada";
+      } catch (e) {
+        document.getElementById("msg").innerText = "❌ Error de conexión";
+      }
+    }
 
-function generateRandomPassword(){
-  const chars='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let pass=''; for(let i=0;i<8;i++){pass+=chars.charAt(Math.floor(Math.random()*chars.length));}
-  return 'LSAF'+pass;
-}
-
-function generatePassword(){
-  const newPass=generateRandomPassword();
-  const cb='cb'+Math.random().toString(36).substr(2,5);
-  window[cb]=function(data){delete window[cb]; script.remove(); passwordField.value=newPass; alert('Contraseña generada: '+newPass);}
-  const script=document.createElement('script');
-  script.src=`${WEBAPP_URL}?action=setPassword&password=${newPass}&callback=${cb}`;
-  document.body.appendChild(script);
-}
-
-function copyPassword(){
-  if(!passwordField.value){alert('Primero genera una contraseña'); return;}
-  navigator.clipboard.writeText(passwordField.value).then(()=>alert('Contraseña copiada: '+passwordField.value));
-}
-</script>
-
+    function copyPassword() {
+      const pass = document.getElementById("password").innerText;
+      navigator.clipboard.writeText(pass);
+      document.getElementById("msg").innerText = "📋 Contraseña copiada: " + pass;
+    }
+  </script>
 </body>
 </html>
