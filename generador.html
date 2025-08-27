@@ -161,14 +161,22 @@
         window.onload = async function() {
             try {
                 const response = await fetch(`${SCRIPT_URL}?action=getPassword`);
+                if (!response.ok) {
+                    throw new Error(`Error HTTP: ${response.status}`);
+                }
+                
                 const data = await response.json();
                 
                 if (data.password) {
                     currentPassword = data.password;
                     document.getElementById('passwordDisplay').textContent = currentPassword;
+                } else {
+                    document.getElementById('passwordDisplay').textContent = 'LSAF2025 (predeterminada)';
                 }
             } catch (error) {
                 console.log('Error al cargar contraseña:', error);
+                document.getElementById('passwordDisplay').textContent = 'LSAF2025 (predeterminada)';
+                showMessage('Error al cargar contraseña. Usando valor predeterminado.', 'error');
             }
         };
 
@@ -184,7 +192,7 @@
                 const randomNum = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
                 const newPassword = `LSAF${randomNum}`;
                 
-                // Actualizar contraseña usando POST
+                // Enviar solicitud usando URL encoded (más compatible con Apps Script)
                 const formData = new URLSearchParams();
                 formData.append('action', 'updatePassword');
                 formData.append('password', newPassword);
@@ -192,26 +200,70 @@
                 const response = await fetch(SCRIPT_URL, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
                     },
-                    body: formData
+                    body: formData.toString()
                 });
                 
-                const result = await response.json();
+                if (!response.ok) {
+                    throw new Error(`Error HTTP: ${response.status}`);
+                }
+                
+                // Leer la respuesta como texto primero
+                const responseText = await response.text();
+                let result;
+                
+                try {
+                    // Intentar parsear como JSON
+                    result = JSON.parse(responseText);
+                } catch (e) {
+                    // Si falla el parsing, verificar si es una respuesta de éxito simple
+                    if (responseText.includes('éxito') || responseText.toLowerCase().includes('success')) {
+                        result = { success: true };
+                    } else {
+                        throw new Error(`Respuesta no válida: ${responseText}`);
+                    }
+                }
                 
                 if (result.success) {
                     currentPassword = newPassword;
                     document.getElementById('passwordDisplay').textContent = currentPassword;
-                    showMessage('Contraseña actualizada correctamente', 'success');
+                    showMessage('¡Contraseña actualizada correctamente!', 'success');
+                    
+                    // Verificar que se guardó correctamente
+                    setTimeout(verifyPasswordUpdate, 1500);
                 } else {
                     showMessage('Error al actualizar: ' + (result.error || 'Error desconocido'), 'error');
                 }
             } catch (error) {
+                console.error('Error completo:', error);
                 showMessage('Error de conexión: ' + error.message, 'error');
-                console.error('Error:', error);
             } finally {
                 generateBtn.innerHTML = '<i class="fas fa-key"></i> Generar Nueva Contraseña';
                 generateBtn.disabled = false;
+            }
+        }
+
+        // Función para verificar que la contraseña se actualizó correctamente
+        async function verifyPasswordUpdate() {
+            try {
+                const response = await fetch(`${SCRIPT_URL}?action=getPassword&t=${new Date().getTime()}`);
+                if (!response.ok) {
+                    throw new Error(`Error HTTP: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.password === currentPassword) {
+                    console.log('✓ Contraseña verificada correctamente en el servidor');
+                    showMessage('✓ Contraseña sincronizada en todos los dispositivos', 'success');
+                } else {
+                    console.warn('✗ La contraseña en el servidor no coincide');
+                    showMessage('¡Advertencia! La contraseña no se sincronizó correctamente', 'error');
+                }
+            } catch (error) {
+                console.error('Error al verificar contraseña:', error);
+                showMessage('Error al verificar sincronización: ' + error.message, 'error');
             }
         }
 
@@ -223,7 +275,7 @@
             
             navigator.clipboard.writeText(currentPassword)
                 .then(() => {
-                    showMessage('Contraseña copiada: ' + currentPassword, 'success');
+                    showMessage('✓ Contraseña copiada: ' + currentPassword, 'success');
                 })
                 .catch(err => {
                     // Fallback para navegadores que no soportan clipboard API
@@ -231,9 +283,15 @@
                     tempTextArea.value = currentPassword;
                     document.body.appendChild(tempTextArea);
                     tempTextArea.select();
-                    document.execCommand('copy');
+                    
+                    try {
+                        document.execCommand('copy');
+                        showMessage('✓ Contraseña copiada: ' + currentPassword, 'success');
+                    } catch (e) {
+                        showMessage('Error al copiar: ' + e.message, 'error');
+                    }
+                    
                     document.body.removeChild(tempTextArea);
-                    showMessage('Contraseña copiada: ' + currentPassword, 'success');
                 });
         }
 
@@ -243,38 +301,45 @@
             messageDiv.className = 'message ' + type;
             messageDiv.style.display = 'block';
             
+            // Ocultar después de 4 segundos (más tiempo para mensajes de éxito)
             setTimeout(() => {
                 messageDiv.style.display = 'none';
-            }, 4000);
+            }, type === 'success' ? 4000 : 5000);
         }
 
-        // Prueba manual de la función updatePassword
-        async function testUpdatePassword() {
-            console.log('Probando updatePassword...');
+        // Función para probar manualmente desde la consola
+        window.testUpdatePassword = async function(testPassword = 'LSAF9999') {
+            console.log('🔧 Probando updatePassword con:', testPassword);
+            
             try {
                 const formData = new URLSearchParams();
                 formData.append('action', 'updatePassword');
-                formData.append('password', 'LSAF9999');
+                formData.append('password', testPassword);
                 
                 const response = await fetch(SCRIPT_URL, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
                     },
-                    body: formData
+                    body: formData.toString()
                 });
                 
-                const result = await response.json();
-                console.log('Resultado de prueba:', result);
-                return result;
+                const responseText = await response.text();
+                console.log('📋 Respuesta del servidor:', responseText);
+                
+                try {
+                    const result = JSON.parse(responseText);
+                    console.log('✅ Resultado parseado:', result);
+                    return result;
+                } catch (e) {
+                    console.log('⚠️ La respuesta no es JSON válido:', responseText);
+                    return {rawResponse: responseText};
+                }
             } catch (error) {
-                console.error('Error en prueba:', error);
-                return { success: false, error: error.message };
+                console.error('❌ Error en la prueba:', error);
+                return {error: error.message};
             }
         }
-
-        // Ejecutar prueba al cargar (puedes comentar esto después)
-        // testUpdatePassword().then(result => console.log('Prueba completada:', result));
     </script>
 </body>
 </html>
