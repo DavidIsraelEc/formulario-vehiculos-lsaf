@@ -162,7 +162,7 @@
     // === Cargar el código actual desde Google Sheets ===
     async function fetchCurrentCode() {
     try {
-        const res = await fetch("URL_DE_TU_WEB_APP?" + Date.now());
+        const res = await fetch("https://script.google.com/macros/s/AKfycbwuZVRDOgShaXoDpfNKEG6UvO9FQ_Uh0ULlV9XOvntESC_hR0Xslz-yadDb-CkRolR_/exec" + Date.now());
         const code = await res.text();
         return code.trim();
     } catch (err) {
@@ -189,6 +189,7 @@
   </script>
 </body>
 </html>
+
 
 
 
