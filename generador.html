@@ -157,6 +157,21 @@
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxQRdiUAiR3fjXuRNG7k1FUv7tSntzP7uLQltFl2OGxBRC5addaK70nx5ni1CjXaH-C/exec';
         let currentPassword = '';
 
+        // Cargar contraseña actual al iniciar
+        window.onload = async function() {
+            try {
+                const response = await fetch(`${SCRIPT_URL}?action=getPassword`);
+                const data = await response.json();
+                
+                if (data.password) {
+                    currentPassword = data.password;
+                    document.getElementById('passwordDisplay').textContent = currentPassword;
+                }
+            } catch (error) {
+                console.log('Error al cargar contraseña:', error);
+            }
+        };
+
         async function generatePassword() {
             const generateBtn = document.getElementById('generateBtn');
             const messageDiv = document.getElementById('message');
@@ -165,10 +180,23 @@
             generateBtn.disabled = true;
             
             try {
+                // Generar nueva contraseña
                 const randomNum = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
                 const newPassword = `LSAF${randomNum}`;
                 
-                const response = await fetch(`${SCRIPT_URL}?action=updatePassword&password=${newPassword}`);
+                // Actualizar contraseña usando POST
+                const formData = new URLSearchParams();
+                formData.append('action', 'updatePassword');
+                formData.append('password', newPassword);
+                
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: formData
+                });
+                
                 const result = await response.json();
                 
                 if (result.success) {
@@ -176,10 +204,11 @@
                     document.getElementById('passwordDisplay').textContent = currentPassword;
                     showMessage('Contraseña actualizada correctamente', 'success');
                 } else {
-                    showMessage('Error al actualizar la contraseña', 'error');
+                    showMessage('Error al actualizar: ' + (result.error || 'Error desconocido'), 'error');
                 }
             } catch (error) {
-                showMessage('Error de conexión', 'error');
+                showMessage('Error de conexión: ' + error.message, 'error');
+                console.error('Error:', error);
             } finally {
                 generateBtn.innerHTML = '<i class="fas fa-key"></i> Generar Nueva Contraseña';
                 generateBtn.disabled = false;
@@ -197,6 +226,7 @@
                     showMessage('Contraseña copiada: ' + currentPassword, 'success');
                 })
                 .catch(err => {
+                    // Fallback para navegadores que no soportan clipboard API
                     const tempTextArea = document.createElement('textarea');
                     tempTextArea.value = currentPassword;
                     document.body.appendChild(tempTextArea);
@@ -215,23 +245,36 @@
             
             setTimeout(() => {
                 messageDiv.style.display = 'none';
-            }, 3000);
+            }, 4000);
         }
 
-        window.onload = function() {
-            // Cargar contraseña actual al iniciar
-            fetch(`${SCRIPT_URL}?action=getPassword`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.password) {
-                        currentPassword = data.password;
-                        document.getElementById('passwordDisplay').textContent = currentPassword;
-                    }
-                })
-                .catch(error => {
-                    console.log('Error al cargar contraseña:', error);
+        // Prueba manual de la función updatePassword
+        async function testUpdatePassword() {
+            console.log('Probando updatePassword...');
+            try {
+                const formData = new URLSearchParams();
+                formData.append('action', 'updatePassword');
+                formData.append('password', 'LSAF9999');
+                
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: formData
                 });
-        };
+                
+                const result = await response.json();
+                console.log('Resultado de prueba:', result);
+                return result;
+            } catch (error) {
+                console.error('Error en prueba:', error);
+                return { success: false, error: error.message };
+            }
+        }
+
+        // Ejecutar prueba al cargar (puedes comentar esto después)
+        // testUpdatePassword().then(result => console.log('Prueba completada:', result));
     </script>
 </body>
 </html>
