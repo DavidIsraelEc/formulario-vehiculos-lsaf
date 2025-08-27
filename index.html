@@ -160,50 +160,36 @@
     let ACTIVE_CODE = "";
 
     // === Cargar el código actual desde Google Sheets ===
-    function fetchCurrentCode() {
-      const script = document.createElement("script");
-      script.src = SHEET_URL + "?callback=setCode&t=" + new Date().getTime();
-      document.body.appendChild(script);
+    async function fetchCurrentCode() {
+    try {
+        const res = await fetch("URL_DE_TU_WEB_APP?" + Date.now());
+        const code = await res.text();
+        return code.trim();
+    } catch (err) {
+        console.error("Error obteniendo código:", err);
+        return null;
     }
-
-    // === Callback JSONP ===
-    function setCode(data) {
-      ACTIVE_CODE = data.currentCode;
-      console.log("Código actual recibido:", ACTIVE_CODE);
-    }
-
-    // === Verificar acceso ===
-    function checkAccess() {
-  const inputPassword = document.getElementById("passwordInput").value;
-  console.log("Contraseña ingresada:", inputPassword);
-
-  google.script.run
-    .withSuccessHandler(function(response) {
-      console.log("Contraseña válida:", response);
-
-      if (response === inputPassword) {
-        // Ocultar pantalla de acceso
-        document.getElementById("accessSection").style.display = "none";
-        // Mostrar formulario
-        document.getElementById("formContent").style.display = "block";
-      } else {
-        // Mostrar mensaje de error
-        document.getElementById("accessError").style.display = "block";
-      }
-    })
-    .withFailureHandler(function(err) {
-      console.error("Error en la verificación:", err);
-      document.getElementById("accessError").style.display = "block";
-    })
-    .getAccessCode(); // tu función en Apps Script
 }
 
+    // === Verificar acceso ===
+    async function checkAccess() {
+    const inputPassword = document.getElementById("passwordInput").value;
+    const currentCode = await fetchCurrentCode();
+
+    if (inputPassword === currentCode) {
+        document.getElementById("accessSection").style.display = "none";
+        document.getElementById("formContent").style.display = "block";
+    } else {
+        document.getElementById("accessError").style.display = "block";
+    }
+}
 
     // Llamar automáticamente al cargar la página
     fetchCurrentCode();
   </script>
 </body>
 </html>
+
 
 
 
