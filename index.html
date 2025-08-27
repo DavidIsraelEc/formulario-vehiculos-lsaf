@@ -155,10 +155,10 @@
 
     <script>
 const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwuZVRDOgShaXoDpfNKEG6UvO9FQ_Uh0ULlV9XOvntESC_hR0Xslz-yadDb-CkRolR_/exec'; // tu Web App de Google Apps Script
-let ACTIVE_CODE = '';
+let _CODE = '';
 
 // Consultar contraseña actual
-let ACTIVE_CODE = ""; // variable global
+
 
 async function fetchCurrentCode() {
   try {
@@ -226,6 +226,7 @@ setInterval(fetchCurrentCode, 10000);
 </script>
 </body>
 </html>
+
 
 
 
