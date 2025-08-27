@@ -47,7 +47,6 @@
 </style>
 </head>
 <body>
-
 <!-- SECCIÓN DE ACCESO -->
 <div id="accessSection" class="access-section">
     <div class="access-container">
@@ -59,7 +58,7 @@
         <button id="checkBtn">
             <i class="fas fa-unlock"></i> Verificar Acceso
         </button>
-        <p id="accessError" style="color: #fff; background: rgba(200,0,0,0.5); padding: 10px; border-radius: 5px; display: none; margin-top: 15px;">
+        <p id="accessError" style="color: #fff; background: rgba(200, 0, 0, 0.5); padding: 10px; border-radius: 5px; display: none; margin-top: 15px;">
             <i class="fas fa-exclamation-circle"></i> Código incorrecto o ya utilizado
         </p>
     </div>
@@ -96,7 +95,9 @@
 
         <form id="vehicleForm">
             <div class="form-section">
-                <div class="form-section-title"><i class="fas fa-user"></i> Información Personal</div>
+                <div class="form-section-title">
+                    <i class="fas fa-user"></i> Información Personal
+                </div>
                 <div class="form-group">
                     <label for="nombre" class="required">Nombre y Apellido</label>
                     <input type="text" id="nombre" name="nombre" required placeholder="Ej: David Toro">
@@ -114,7 +115,9 @@
             </div>
 
             <div class="form-section">
-                <div class="form-section-title"><i class="fas fa-car"></i> Información del Vehículo</div>
+                <div class="form-section-title">
+                    <i class="fas fa-car"></i> Información del Vehículo
+                </div>
                 <div class="two-columns">
                     <div class="form-group">
                         <label for="marca" class="required">Marca del Vehículo</label>
@@ -160,7 +163,7 @@ document.addEventListener("DOMContentLoaded", () => {
     async function fetchCurrentCode() {
         try {
             const res = await fetch(CURRENT_CODE_URL);
-            const json = await res.json(); // JSON puro desde Apps Script
+            const json = await res.json();
             return json.currentCode;
         } catch (err) {
             console.error("Error obteniendo código:", err);
@@ -204,8 +207,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(formData)
             });
-
             const result = await res.json();
+
             if (result.status === "success") {
                 messageBox.textContent = "Registro enviado con éxito!";
                 messageBox.className = "message success";
@@ -233,6 +236,7 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 </body>
 </html>
+
 
 
 
