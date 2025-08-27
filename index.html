@@ -149,88 +149,70 @@
 </div>
 
 <script>
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwuZVRDOgShaXoDpfNKEG6UvO9FQ_Uh0ULlV9XOvntESC_hR0Xslz-yadDb-CkRolR_/exec";
+    const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwuZVRDOgShaXoDpfNKEG6UvO9FQ_Uh0ULlV9XOvntESC_hR0Xslz-yadDb-CkRolR_/exec";
 
-let currentCode = "";
+    // Validar contraseña
+    function checkPassword() {
+      const passwordInput = document.getElementById("passwordInput").value;
 
-// Obtener código actual
-async function fetchCurrentCode() {
-    try {
-        const response = await fetch(WEB_APP_URL);
-        const data = await response.json();
-        currentCode = data.currentCode;
-        console.log("Código actual recibido:", currentCode);
-    } catch (err) {
-        console.error("Error obteniendo código:", err);
+      fetch(WEBAPP_URL)
+        .then(res => res.json())
+        .then(data => {
+          console.log("Código actual recibido:", data.currentCode);
+
+          if (passwordInput === data.currentCode) {
+            console.log("Contraseña válida");
+            document.getElementById("formContainer").classList.remove("hidden");
+            document.getElementById("loginContainer").classList.add("hidden");
+          } else {
+            alert("Contraseña incorrecta");
+          }
+        })
+        .catch(err => console.error("Error obteniendo código:", err));
     }
-}
 
-// Verificar acceso
-function checkAccess() {
-    const input = document.getElementById("passwordInput").value.trim();
-    console.log("Contraseña ingresada:", input);
+    // Registrar vehículo
+    function registrar() {
+      const btn = document.getElementById("submitBtn");
+      const msg = document.getElementById("mensaje");
 
-    if (input === currentCode) {
-        document.getElementById("accessSection").classList.add("hidden");
-        document.getElementById("formContent").classList.remove("hidden");
-    } else {
-        document.getElementById("accessError").style.display = "block";
-    }
-}
-
-// Manejar envío del formulario
-document.getElementById("vehicleForm").addEventListener("submit", async function(e) {
-    e.preventDefault();
-
-    const submitBtn = document.getElementById("submitBtn");
-    const originalText = submitBtn.innerHTML;
-
-    // Deshabilitar botón y mostrar cargando
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<span class="loading-spinner"></span> Registrando...';
-
-    const formData = {
+      const data = {
         nombre: document.getElementById("nombre").value,
         nuim: document.getElementById("nuim").value,
         telefono: document.getElementById("telefono").value,
         marca: document.getElementById("marca").value,
         modelo: document.getElementById("modelo").value,
         color: document.getElementById("color").value,
-        matricula: document.getElementById("matricula").value
-    };
+        matricula: document.getElementById("matricula").value,
+      };
 
-    try {
-        const response = await fetch(CURRENT_CODE_URL + "?action=submit", {
-            method: "POST",
-            body: JSON.stringify(formData)
-        });
+      btn.disabled = true;
+      btn.textContent = "Cargando...";
 
-        const result = await response.json();
-
-        if (result.status === "success") {
-            document.getElementById("message").className = "message success";
-            document.getElementById("message").innerText = "Vehículo registrado correctamente!";
-            document.getElementById("vehicleForm").reset();
+      fetch(WEBAPP_URL, {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: { "Content-Type": "application/json" }
+      })
+      .then(res => res.json())
+      .then(result => {
+        if (result.success) {
+          msg.classList.remove("hidden");
+          setTimeout(() => msg.classList.add("hidden"), 3000);
         } else {
-            document.getElementById("message").className = "message error";
-            document.getElementById("message").innerText = "Error registrando el vehículo.";
+          alert("Error al registrar");
         }
-    } catch (err) {
-        document.getElementById("message").className = "message error";
-        document.getElementById("message").innerText = "Error de conexión al servidor.";
-        console.error(err);
-    } finally {
-        // Habilitar el botón de nuevo y restaurar texto
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = originalText;
+      })
+      .catch(err => console.error("Error:", err))
+      .finally(() => {
+        btn.disabled = false;
+        btn.textContent = "Registrar Vehículo";
+      });
     }
-});
-// Actualizar código al cargar
-fetchCurrentCode();
-setInterval(fetchCurrentCode, 30000); // actualizar cada 30s
-</script>
+  </script>
 
 </body>
 </html>
+
 
 
