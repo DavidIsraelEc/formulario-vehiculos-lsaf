@@ -239,7 +239,6 @@
     </style>
 </head>
 <body>
-    <!-- SECCIÓN DE ACCESO -->
     <div id="accessSection" class="access-section">
         <div class="access-container">
             <h2><i class="fas fa-lock"></i> Sistema de Registro LSAF</h2>
@@ -259,7 +258,6 @@
         </div>
     </div>
     
-    <!-- ACCESO DENEGADO -->
     <div id="accessDenied" class="container hidden">
         <div class="access-denied">
             <i class="fas fa-ban"></i>
@@ -269,7 +267,6 @@
         </div>
     </div>
     
-    <!-- FORMULARIO -->
     <div id="formContent" class="container hidden">
         <div class="header">
             <div class="logo-container">
@@ -345,21 +342,11 @@
     </div>
 
     <script>
-        // ===============================
-        // DETECCIÓN AUTOMÁTICA DE CONTRASEÑA
-        // ===============================
-        // Leer la contraseña actual del localStorage
-        function getCurrentPassword() {
-            // Intentar obtener la contraseña del generador
-            const generatedPassword = localStorage.getItem('lsaf_current_password');
-            
-            // Si no hay contraseña generada, usar la por defecto
-            return generatedPassword || "LSAF2025";
-        }
-
-        // CONFIGURACIÓN DE ACCESO
-        const ACTIVE_CODE = getCurrentPassword(); // 🔑 Se actualiza automáticamente
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwZ9QKJ6fa8Z6sySry5AHmpeha1uIRuSHejuraVHU_tZXmBO7fuWsVQ-JrxE4yJQAdb/exec';
         const USED_KEY = "used_code";
+        
+        let ACTIVE_CODE = "LSAF2025";
+        let currentCode = null;
 
         const accessSection = document.getElementById('accessSection');
         const accessDenied = document.getElementById('accessDenied');
@@ -367,9 +354,22 @@
         const accessError = document.getElementById('accessError');
         const accessCodeInput = document.getElementById('accessCode');
 
-        let currentCode = null; // Guardamos el código que se usará
+        async function loadCurrentPassword() {
+            try {
+                const response = await fetch(`${SCRIPT_URL}?action=getPassword`);
+                const data = await response.json();
+                
+                if (data.password) {
+                    ACTIVE_CODE = data.password;
+                }
+            } catch (error) {
+                console.log('Error al cargar contraseña:', error);
+            }
+        }
 
-        function checkAccess() {
+        async function checkAccess() {
+            await loadCurrentPassword();
+            
             let codeToCheck = accessCodeInput.value.trim();
 
             if (!codeToCheck) {
@@ -377,14 +377,13 @@
                 return;
             }
 
-            // Solo mostrar acceso denegado si la página ya estaba cerrada y reabierta
             if (localStorage.getItem(USED_KEY) === ACTIVE_CODE) {
                 showAccessDenied();
                 return;
             }
 
             if (codeToCheck === ACTIVE_CODE) {
-                currentCode = codeToCheck; // Guardamos el código activo
+                currentCode = codeToCheck;
                 accessSection.classList.add('hidden');
                 formContent.classList.remove('hidden');
             } else {
@@ -403,21 +402,10 @@
             accessDenied.classList.remove('hidden');
         }
 
-        // Al cargar la página, solo bloquear si cerró y vuelve a abrir
-        window.onload = function() {
-            if (localStorage.getItem(USED_KEY) === ACTIVE_CODE) {
-                showAccessDenied();
-            }
-        };
-
-        // Enter = enviar
         accessCodeInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') { checkAccess(); }
         });
 
-        // ===============================
-        // FORMULARIO
-        // ===============================
         const form = document.getElementById('vehicleForm');
         const submitBtn = document.getElementById('submitBtn');
         const messageDiv = document.getElementById('message');
@@ -445,9 +433,7 @@
             messageDiv.className = "message";
             messageDiv.style.display = "block";
 
-            const scriptURL = 'https://script.google.com/macros/s/AKfycbwZ9QKJ6fa8Z6sySry5AHmpeha1uIRuSHejuraVHU_tZXmBO7fuWsVQ-JrxE4yJQAdb/exec';
-
-            fetch(scriptURL, {
+            fetch(SCRIPT_URL, {
                 method: 'POST',
                 mode: 'no-cors',
                 headers: {'Content-Type': 'application/json'},
@@ -458,7 +444,6 @@
                 messageDiv.className = "message success";
                 form.reset();
 
-                // 🔥 Solo quemar el código después de enviar correctamente
                 if (currentCode) {
                     localStorage.setItem(USED_KEY, currentCode);
                 }
@@ -481,28 +466,13 @@
             });
         });
 
-        // Escuchar mensajes desde el generador de contraseñas
-        window.addEventListener('message', function(event) {
-            if (event.data.type === 'UPDATE_PASSWORD') {
-                // Actualizar la contraseña en tiempo real
-                ACTIVE_CODE = event.data.password;
-                localStorage.setItem('lsaf_current_password', event.data.password);
-                
-                // Si el formulario está abierto, mostrar mensaje
-                if (!formContent.classList.contains('hidden')) {
-                    messageDiv.textContent = "Contraseña actualizada. Cierre y vuelva a abrir para usar nueva contraseña.";
-                    messageDiv.className = "message info";
-                    messageDiv.style.display = "block";
-                }
+        window.onload = async function() {
+            await loadCurrentPassword();
+            
+            if (localStorage.getItem(USED_KEY) === ACTIVE_CODE) {
+                showAccessDenied();
             }
-        });
-
-        // Solicitar contraseña actual al generador si está abierto
-        if (window.opener) {
-            window.opener.postMessage({
-                type: 'REQUEST_PASSWORD'
-            }, '*');
-        }
+        };
     </script>
 </body>
 </html>
