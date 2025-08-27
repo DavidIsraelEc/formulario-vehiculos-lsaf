@@ -160,14 +160,14 @@
     </div>
 
     <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwjC9OvoHQOqksobwRntn-5GP-DsWLyzIo3SciHVnS5VhirVcdc0iitVKfezUiqH8FO/exec';
+        const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwjC9OvoHQOqksobwRntn-5GP-DsWLyzIo3SciHVnS5VhirVcdc0iitVKfezUiqH8FO/exec';
         let currentPassword = 'LSAF2025'; // Valor por defecto
 
         // Al cargar la página, traer contraseña actual desde la hoja
         window.onload = async function() {
             document.getElementById('passwordDisplay').textContent = 'Cargando...';
             try {
-                const res = await fetch(SCRIPT_URL + '?action=getPassword');
+                const res = await fetch(WEBAPP_URL + '?action=getPassword');
                 const data = await res.json();
                 if (data.password) {
                     currentPassword = data.password;
@@ -193,7 +193,7 @@
                 const newPassword = `LSAF${randomNum}`;
                 document.getElementById('passwordDisplay').textContent = newPassword;
 
-                const res = await fetch(SCRIPT_URL, {
+                const res = await fetch(WEBAPP_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
