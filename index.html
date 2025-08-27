@@ -137,119 +137,99 @@ button:disabled { background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
 </div>
 
 <script>
-// ==================== SCRIPT DE CONTRASEÑA REMOTA ====================
-const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwjC9OvoHQOqksobwRntn-5GP-DsWLyzIo3SciHVnS5VhirVcdc0iitVKfezUiqH8FO/exec'; // <<---- Pega tu URL de la WebApp
-const USED_KEY = "used_code";
-
+// === CONFIG ===
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwjC9OvoHQOqksobwRntn-5GP-DsWLyzIo3SciHVnS5VhirVcdc0iitVKfezUiqH8FO/exec"; // reemplaza con la URL de tu WebApp
 let ACTIVE_CODE = "LSAF2025";
-let currentCode = null;
 
-const accessSection = document.getElementById('accessSection');
-const accessDenied = document.getElementById('accessDenied');
-const formContent = document.getElementById('formContent');
-const accessError = document.getElementById('accessError');
-const accessCodeInput = document.getElementById('accessCode');
-
-function loadPassword() {
-  return new Promise((resolve,reject)=>{
-    const callbackName = 'cb_'+Math.random().toString(36).substring(2,15);
-    window[callbackName] = function(data){
-      delete window[callbackName];
+// === FUNCIONES DE CONTRASEÑA REMOTA ===
+function loadCurrentPassword() {
+  return new Promise(resolve => {
+    const cb = "cb_" + Math.floor(Math.random()*1000000);
+    window[cb] = function(data){
+      delete window[cb];
       document.body.removeChild(script);
-      if(data && data.password) resolve(data.password);
-      else resolve('LSAF2025');
+      ACTIVE_CODE = data.password || "LSAF2025";
+      resolve(ACTIVE_CODE);
     };
-    const script = document.createElement('script');
-    script.src = `${WEBAPP_URL}?action=getPassword&callback=${callbackName}`;
-    script.onerror = ()=>{ delete window[callbackName]; document.body.removeChild(script); resolve('LSAF2025'); };
+    const script = document.createElement("script");
+    script.src = `${WEBAPP_URL}?action=getPassword&callback=${cb}`;
     document.body.appendChild(script);
   });
 }
 
+// === VERIFICAR ACCESO ===
+const accessSection = document.getElementById('accessSection');
+const accessDenied = document.getElementById('accessDenied');
+const formContent = document.getElementById('formContent');
+const accessCodeInput = document.getElementById('accessCode');
+
 async function checkAccess(){
-  const codeToCheck = accessCodeInput.value.trim();
-  if(!codeToCheck){ showError("Por favor ingresa un código"); return; }
-
-  ACTIVE_CODE = await loadPassword();
-
-  if(localStorage.getItem(USED_KEY) === ACTIVE_CODE){ showAccessDenied(); return; }
-
-  if(codeToCheck===ACTIVE_CODE){
-    currentCode=codeToCheck;
-    accessSection.classList.add('hidden');
-    formContent.classList.remove('hidden');
-  }else{ showError("Código incorrecto"); }
+  await loadCurrentPassword();
+  const code = accessCodeInput.value.trim();
+  if(!code){
+    showError("Ingresa un código");
+    return;
+  }
+  if(code === ACTIVE_CODE){
+    accessSection.classList.add("hidden");
+    formContent.classList.remove("hidden");
+  } else {
+    showError("Código incorrecto");
+  }
 }
 
-function showError(message){
-  accessError.textContent="✗ "+message;
-  accessError.style.display='block';
-  setTimeout(()=>{ accessError.style.display='none'; },3000);
+function showError(msg){
+  const e = document.getElementById("accessError");
+  e.textContent = "✗ " + msg;
+  e.style.display = "block";
+  setTimeout(()=>{ e.style.display="none"; }, 3000);
 }
 
-function showAccessDenied(){
-  accessSection.classList.add('hidden');
-  accessDenied.classList.remove('hidden');
-}
+accessCodeInput.addEventListener('keypress', e=>{
+  if(e.key==='Enter'){ checkAccess(); }
+});
 
-// Activar Enter para validar
-accessCodeInput.addEventListener('keypress',function(e){ if(e.key==='Enter'){ checkAccess(); } });
-
-window.onload = async function(){
-  ACTIVE_CODE = await loadPassword();
-  if(localStorage.getItem(USED_KEY)===ACTIVE_CODE){ showAccessDenied(); }
-};
-
-// ==================== FIN SCRIPT CONTRASEÑA REMOTA ====================
-
-// ==================== SCRIPT ENVÍO FORMULARIO ====================
+// === FORMULARIO ===
 const form = document.getElementById('vehicleForm');
 const submitBtn = document.getElementById('submitBtn');
 const messageDiv = document.getElementById('message');
-let isSubmitting = false;
+let isSubmitting=false;
 
-form.addEventListener('submit',function(e){
+form.addEventListener('submit', function(e){
   e.preventDefault();
   if(isSubmitting) return;
-  isSubmitting = true;
-  submitBtn.disabled = true;
+  isSubmitting=true;
+  submitBtn.disabled=true;
   submitBtn.innerHTML='<span class="loading-spinner"></span> Procesando...';
 
-  const formData={
-    nombre:document.getElementById('nombre').value,
-    nuim:document.getElementById('nuim').value,
-    telefono:document.getElementById('telefono').value,
-    marca:document.getElementById('marca').value,
-    modelo:document.getElementById('modelo').value,
-    color:document.getElementById('color').value,
-    matricula:document.getElementById('matricula').value
+  const formData = {
+    nombre: document.getElementById('nombre').value,
+    nuim: document.getElementById('nuim').value,
+    telefono: document.getElementById('telefono').value,
+    marca: document.getElementById('marca').value,
+    modelo: document.getElementById('modelo').value,
+    color: document.getElementById('color').value,
+    matricula: document.getElementById('matricula').value
   };
 
-  messageDiv.textContent="Enviando datos al sistema...";
-  messageDiv.className="message";
-  messageDiv.style.display="block";
-
-  fetch(WEBAPP_URL,{
-    method:'POST',
-    mode:'no-cors',
+  fetch(WEBAPP_URL, {
+    method: 'POST',
+    mode: 'no-cors',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify(formData)
-  })
-  .then(()=>{
+    body: JSON.stringify(formData)
+  }).then(()=>{
     messageDiv.textContent="¡Vehículo registrado correctamente!";
     messageDiv.className="message success";
     form.reset();
-    if(currentCode) localStorage.setItem(USED_KEY,currentCode);
     setTimeout(()=>{
       isSubmitting=false;
       submitBtn.disabled=false;
       submitBtn.innerHTML='<i class="fas fa-paper-plane"></i> Registrar Vehículo';
     },2000);
-  })
-  .catch(error=>{
+  }).catch(err=>{
     messageDiv.textContent="Error al enviar los datos, inténtalo de nuevo.";
     messageDiv.className="message error";
-    console.error(error);
+    console.error(err);
     setTimeout(()=>{
       isSubmitting=false;
       submitBtn.disabled=false;
@@ -257,8 +237,14 @@ form.addEventListener('submit',function(e){
     },2000);
   });
 });
+
+// CARGAR CONTRASEÑA AL INICIO
+window.onload = async function(){
+  await loadCurrentPassword();
+};
 </script>
 </body>
 </html>
+
 
 
