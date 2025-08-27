@@ -46,24 +46,17 @@ function showMessage(text,type){
   setTimeout(()=>{msg.style.display='none';},4000);
 }
 
-function generatePassword(){
-  const btn=document.getElementById('generateBtn');
-  btn.disabled=true; btn.textContent='Generando...';
-  const randomNum=Math.floor(Math.random()*9000+1000);
-  const newPass='LSAF'+randomNum;
-  document.getElementById('passwordDisplay').textContent=newPass;
-  currentPassword=newPass;
-
-  // Guardar en Sheet vía WebApp
-  fetch(`${WEBAPP_URL}?action=setPassword&password=${newPass}`)
-    .then(r=>r.json())
-    .then(data=>{
-      if(data.success) showMessage('¡Contraseña actualizada!', 'success');
-      else showMessage('Error al actualizar: '+data.error,'error');
-    })
-    .catch(e=>{console.error(e); showMessage('Error de conexión','error');})
-    .finally(()=>{btn.disabled=false; btn.innerHTML='<i class="fas fa-key"></i> Generar Nueva Contraseña';});
+function generarPassword() {
+    const newPass = 'LSAF' + Math.floor(1000 + Math.random()*9000);
+    const callbackName = 'cb_gen_' + Math.random().toString(36).substring(2,15);
+    window[callbackName] = function(resp) { console.log('Generado y guardado'); delete window[callbackName]; script.remove(); };
+    const script = document.createElement('script');
+    script.src = `${WEBAPP_URL}?action=savePassword&password=${newPass}&callback=${callbackName}`;
+    script.onerror = () => { alert('Error de conexión'); delete window[callbackName]; script.remove(); };
+    document.body.appendChild(script);
+    return newPass;
 }
+
 
 function copyPassword(){
   if(!currentPassword){ showMessage('Primero genera una contraseña','error'); return; }
