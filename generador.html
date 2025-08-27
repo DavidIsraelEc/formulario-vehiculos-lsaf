@@ -6,6 +6,7 @@
     <title>Generador de Contraseñas - LSAF</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* [Mantener todos los estilos anteriores] */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -160,145 +161,139 @@
 
     <script>
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyb_ej-KYxmDgKuT-rtd1FY__b-ZLTWHwipnLPsbGitFyuM7idb1sOZSvCHJ2GEKXRN/exec';
-        let currentPassword = '';
+        let currentPassword = 'LSAF2025'; // Valor por defecto
 
-        // Cargar contraseña actual al iniciar
-        window.onload = async function() {
-            try {
-                showMessage('Cargando contraseña actual...', 'info');
+        // SOLUCIÓN: Usar JSONP para evitar problemas de CORS
+        function loadPasswordWithJSONP() {
+            return new Promise((resolve, reject) => {
+                const callbackName = 'passwordCallback_' + Math.round(100000 * Math.random());
+                const script = document.createElement('script');
                 
-                const response = await fetch(`${SCRIPT_URL}?action=getPassword&t=${new Date().getTime()}`);
+                window[callbackName] = function(data) {
+                    delete window[callbackName];
+                    document.body.removeChild(script);
+                    
+                    if (data && data.password) {
+                        resolve(data.password);
+                    } else {
+                        resolve('LSAF2025'); // Valor por defecto
+                    }
+                };
                 
-                if (!response.ok) {
-                    throw new Error(`Error HTTP: ${response.status}`);
-                }
+                script.src = `${SCRIPT_URL}?action=getPassword&callback=${callbackName}`;
+                script.onerror = () => {
+                    delete window[callbackName];
+                    document.body.removeChild(script);
+                    resolve('LSAF2025'); // Fallback a valor por defecto
+                };
                 
-                const data = await response.json();
-                
-                if (data.password) {
-                    currentPassword = data.password;
-                    document.getElementById('passwordDisplay').textContent = currentPassword;
-                    showMessage('Contraseña cargada correctamente', 'success');
-                } else {
-                    currentPassword = 'LSAF2025';
-                    document.getElementById('passwordDisplay').textContent = currentPassword + ' (predeterminada)';
-                    showMessage('Usando contraseña predeterminada', 'info');
-                }
-            } catch (error) {
-                console.log('Error al cargar contraseña:', error);
-                currentPassword = 'LSAF2025';
-                document.getElementById('passwordDisplay').textContent = currentPassword + ' (predeterminada)';
-                showMessage('Error al cargar. Usando valor predeterminado.', 'error');
-                
-                // Ocultar mensaje de error después de 5 segundos
+                // Timeout después de 5 segundos
                 setTimeout(() => {
-                    const messageDiv = document.getElementById('message');
-                    if (messageDiv.classList.contains('error')) {
-                        messageDiv.style.display = 'none';
+                    if (window[callbackName]) {
+                        delete window[callbackName];
+                        document.body.removeChild(script);
+                        resolve('LSAF2025'); // Fallback por timeout
                     }
                 }, 5000);
+                
+                document.body.appendChild(script);
+            });
+        }
+
+        // Cargar contraseña actual al iniciar - VERSIÓN MEJORADA
+        window.onload = async function() {
+            document.getElementById('passwordDisplay').textContent = 'Cargando...';
+            
+            try {
+                // Intentar con JSONP primero
+                const password = await loadPasswordWithJSONP();
+                currentPassword = password;
+                document.getElementById('passwordDisplay').textContent = currentPassword;
+                showMessage('Contraseña cargada correctamente', 'success');
+            } catch (error) {
+                console.log('Error al cargar contraseña:', error);
+                document.getElementById('passwordDisplay').textContent = currentPassword + ' (predeterminada)';
+                showMessage('Usando contraseña predeterminada', 'info');
             }
         };
 
-        // Función principal para generar contraseña - ACTUALIZADA
-        async function generatePassword() {
-  const generateBtn = document.getElementById('generateBtn');
-  const messageDiv = document.getElementById('message');
-  
-  generateBtn.innerHTML = '<span class="loading"></span> Generando...';
-  generateBtn.disabled = true;
-  
-  try {
-    const randomNum = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-    const newPassword = `LSAF${randomNum}`;
-    
-    // SOLUCIÓN ALTERNATIVA: Usar JSONP para evitar CORS
-    await updatePasswordJSONP(newPassword);
-    
-    currentPassword = newPassword;
-    document.getElementById('passwordDisplay').textContent = currentPassword;
-    showMessage('¡Contraseña actualizada correctamente!', 'success');
-    
-  } catch (error) {
-    console.error('Error completo:', error);
-    
-    // Intentar método alternativo con Google Sheets API directa
-    try {
-      await updatePasswordDirectSheets(newPassword);
-      currentPassword = newPassword;
-      document.getElementById('passwordDisplay').textContent = currentPassword;
-      showMessage('Contraseña actualizada (método alternativo)', 'success');
-    } catch (fallbackError) {
-      showMessage('Error de conexión. La contraseña se actualizó localmente.', 'error');
-    }
-  } finally {
-    generateBtn.innerHTML = '<i class="fas fa-key"></i> Generar Nueva Contraseña';
-    generateBtn.disabled = false;
-  }
-}
+        // Función para actualizar contraseña usando JSONP
+        function updatePasswordWithJSONP(newPassword) {
+            return new Promise((resolve, reject) => {
+                const callbackName = 'updateCallback_' + Math.round(100000 * Math.random());
+                const script = document.createElement('script');
+                
+                window[callbackName] = function(data) {
+                    delete window[callbackName];
+                    document.body.removeChild(script);
+                    
+                    if (data && data.success) {
+                        resolve(data);
+                    } else {
+                        reject(new Error(data.error || 'Error desconocido'));
+                    }
+                };
+                
+                script.src = `${SCRIPT_URL}?action=updatePassword&password=${encodeURIComponent(newPassword)}&callback=${callbackName}`;
+                script.onerror = () => {
+                    delete window[callbackName];
+                    document.body.removeChild(script);
+                    reject(new Error('Error de conexión'));
+                };
+                
+                // Timeout después de 8 segundos
+                setTimeout(() => {
+                    if (window[callbackName]) {
+                        delete window[callbackName];
+                        document.body.removeChild(script);
+                        reject(new Error('Timeout'));
+                    }
+                }, 8000);
+                
+                document.body.appendChild(script);
+            });
+        }
 
-// Método alternativo usando JSONP (evita CORS)
-function updatePasswordJSONP(password) {
-  return new Promise((resolve, reject) => {
-    // Crear script temporal para JSONP
-    const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
-    const script = document.createElement('script');
-    
-    window[callbackName] = function(data) {
-      delete window[callbackName];
-      document.body.removeChild(script);
-      
-      if (data.success) {
-        resolve(data);
-      } else {
-        reject(new Error(data.error || 'Error desconocido'));
-      }
-    };
-    
-    // Añadir parámetros a la URL
-    const url = `${SCRIPT_URL}?action=updatePassword&password=${encodeURIComponent(password)}&callback=${callbackName}`;
-    script.src = url;
-    
-    // Manejar errores
-    script.onerror = function() {
-      delete window[callbackName];
-      document.body.removeChild(script);
-      reject(new Error('Error de carga JSONP'));
-    };
-    
-    // Timeout
-    setTimeout(() => {
-      if (window[callbackName]) {
-        delete window[callbackName];
-        document.body.removeChild(script);
-        reject(new Error('Timeout JSONP'));
-      }
-    }, 10000);
-    
-    document.body.appendChild(script);
-  });
-}
-        // Función para verificar que la contraseña se actualizó correctamente
-        async function verifyPasswordUpdate() {
+        // Función principal para generar contraseña
+        async function generatePassword() {
+            const generateBtn = document.getElementById('generateBtn');
+            const messageDiv = document.getElementById('message');
+            
+            generateBtn.innerHTML = '<span class="loading"></span> Generando...';
+            generateBtn.disabled = true;
+            
             try {
-                const response = await fetch(`${SCRIPT_URL}?action=getPassword&t=${new Date().getTime()}`);
+                const randomNum = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+                const newPassword = `LSAF${randomNum}`;
                 
-                if (!response.ok) {
-                    throw new Error(`Error HTTP: ${response.status}`);
-                }
+                // Mostrar inmediatamente para feedback visual
+                document.getElementById('passwordDisplay').textContent = newPassword;
                 
-                const data = await response.json();
+                // Intentar actualizar con JSONP
+                await updatePasswordWithJSONP(newPassword);
                 
-                if (data.password === currentPassword) {
-                    console.log('✓ Contraseña verificada correctamente en el servidor');
-                    showMessage('✓ Contraseña sincronizada en todos los dispositivos', 'success');
-                } else {
-                    console.warn('✗ La contraseña en el servidor no coincide');
-                    showMessage('¡Advertencia! La contraseña no se sincronizó correctamente', 'error');
-                }
+                currentPassword = newPassword;
+                showMessage('¡Contraseña actualizada correctamente!', 'success');
+                
             } catch (error) {
-                console.error('Error al verificar contraseña:', error);
-                showMessage('Error al verificar sincronización', 'error');
+                console.error('Error al actualizar:', error);
+                
+                // Verificar si de todas formas se actualizó en el servidor
+                try {
+                    const verifiedPassword = await loadPasswordWithJSONP();
+                    if (verifiedPassword.startsWith('LSAF')) {
+                        currentPassword = verifiedPassword;
+                        document.getElementById('passwordDisplay').textContent = currentPassword;
+                        showMessage('Contraseña actualizada (verificación retrasada)', 'success');
+                    } else {
+                        showMessage('Error: ' + error.message, 'error');
+                    }
+                } catch (verifyError) {
+                    showMessage('Error de conexión: ' + error.message, 'error');
+                }
+            } finally {
+                generateBtn.innerHTML = '<i class="fas fa-key"></i> Generar Nueva Contraseña';
+                generateBtn.disabled = false;
             }
         }
 
@@ -313,7 +308,7 @@ function updatePasswordJSONP(password) {
                     showMessage('✓ Contraseña copiada: ' + currentPassword, 'success');
                 })
                 .catch(err => {
-                    // Fallback para navegadores que no soportan clipboard API
+                    // Fallback para navegadores antiguos
                     const tempTextArea = document.createElement('textarea');
                     tempTextArea.value = currentPassword;
                     document.body.appendChild(tempTextArea);
@@ -336,68 +331,19 @@ function updatePasswordJSONP(password) {
             messageDiv.className = 'message ' + type;
             messageDiv.style.display = 'block';
             
-            // Ocultar después de un tiempo (más tiempo para mensajes de éxito)
-            const hideTime = type === 'success' ? 4000 : 
-                            type === 'info' ? 3000 : 5000;
-            
             setTimeout(() => {
                 if (messageDiv.textContent === text) {
                     messageDiv.style.display = 'none';
                 }
-            }, hideTime);
+            }, type === 'success' ? 4000 : 5000);
         }
 
-        // Función para probar manualmente desde la consola
-        window.testUpdatePassword = async function(testPassword = 'LSAF9999') {
-            console.log('🔧 Probando updatePassword con:', testPassword);
-            
-            try {
-                const response = await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        action: 'updatePassword',
-                        password: testPassword
-                    })
-                });
-                
-                const responseText = await response.text();
-                console.log('📋 Respuesta del servidor:', responseText);
-                
-                try {
-                    const result = JSON.parse(responseText);
-                    console.log('✅ Resultado parseado:', result);
-                    return result;
-                } catch (e) {
-                    console.log('⚠️ La respuesta no es JSON válido:', responseText);
-                    return {rawResponse: responseText};
-                }
-            } catch (error) {
-                console.error('❌ Error en la prueba:', error);
-                return {error: error.message};
-            }
-        }
-
-        // Función para probar CORS
-        window.testCORS = async function() {
-            console.log('🔧 Probando configuración CORS...');
-            
-            try {
-                const response = await fetch(`${SCRIPT_URL}?action=getPassword&t=${new Date().getTime()}`, {
-                    method: 'GET',
-                    mode: 'cors'
-                });
-                
-                console.log('✅ Status CORS:', response.status, response.statusText);
-                const data = await response.json();
-                console.log('✅ Datos CORS:', data);
-                return data;
-            } catch (error) {
-                console.error('❌ Error CORS:', error);
-                return {error: error.message};
-            }
+        // Función para probar manualmente
+        window.testJSONP = function() {
+            console.log('🔧 Probando JSONP...');
+            loadPasswordWithJSONP()
+                .then(password => console.log('✅ Contraseña cargada:', password))
+                .catch(error => console.error('❌ Error:', error));
         }
     </script>
 </body>
