@@ -473,9 +473,81 @@
                 showAccessDenied();
             }
         };
+// =============================================
+// VERIFICACIÓN PERIÓDICA DE CONTRASEÑA ACTUALIZADA
+// =============================================
+
+let lastPasswordCheck = 0;
+const CHECK_INTERVAL = 30000; // 30 segundos
+
+// Función para verificar si la contraseña ha cambiado
+async function checkForPasswordUpdate() {
+    const now = Date.now();
+    
+    // Solo verificar cada 30 segundos para no sobrecargar
+    if (now - lastPasswordCheck < CHECK_INTERVAL) {
+        return;
+    }
+    
+    lastPasswordCheck = now;
+    
+    try {
+        const response = await fetch(`${SCRIPT_URL}?action=getPassword&t=${now}`);
+        if (!response.ok) return;
+        
+        const data = await response.json();
+        
+        if (data.password && data.password !== ACTIVE_CODE) {
+            // ¡La contraseña ha cambiado!
+            console.log('Contraseña actualizada detectada:', data.password);
+            ACTIVE_CODE = data.password;
+            
+            // Mostrar notificación al usuario
+            if (!formContent.classList.contains('hidden')) {
+                showTemporaryMessage('Se ha actualizado la contraseña del sistema', 'info');
+            }
+        }
+    } catch (error) {
+        console.log('Error al verificar contraseña:', error);
+    }
+}
+
+// Función para mostrar mensajes temporales
+function showTemporaryMessage(message, type) {
+    const tempMessage = document.createElement('div');
+    tempMessage.textContent = message;
+    tempMessage.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px;
+        border-radius: 5px;
+        z-index: 1000;
+        font-weight: bold;
+        background-color: ${type === 'info' ? '#e8f4ff' : '#d4edda'};
+        color: ${type === 'info' ? '#004085' : '#155724'};
+        border: 1px solid ${type === 'info' ? '#b8daff' : '#c3e6cb'};
+    `;
+    
+    document.body.appendChild(tempMessage);
+    
+    // Eliminar después de 5 segundos
+    setTimeout(() => {
+        if (document.body.contains(tempMessage)) {
+            document.body.removeChild(tempMessage);
+        }
+    }, 5000);
+}
+
+// Iniciar verificación periódica
+setInterval(checkForPasswordUpdate, CHECK_INTERVAL);
+
+// Verificar inmediatamente al cargar
+setTimeout(checkForPasswordUpdate, 5000);
     </script>
 </body>
 </html>
+
 
 
 
