@@ -6,7 +6,6 @@
     <title>Registro Vehicular LSAF</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* === TUS ESTILOS ORIGINALES === */
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background: linear-gradient(135deg, #0d2c46 0%, #1a4d79 100%); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
         .container { background-color: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); width: 100%; max-width: 750px; overflow: hidden; }
@@ -57,7 +56,6 @@
             <div class="access-input">
                 <input type="password" id="passwordInput" placeholder="Ingrese la contraseña">
             </div>
-            
 
             <button onclick="checkAccess()">
                 <i class="fas fa-unlock"></i> Verificar Acceso
@@ -68,7 +66,7 @@
             </p>
         </div>
     </div>
-    
+
     <!-- ACCESO DENEGADO -->
     <div id="accessDenied" class="container hidden">
         <div class="access-denied">
@@ -78,83 +76,11 @@
             <p>Contacta con Plana Mayor para registrar un nuevo vehículo.</p>
         </div>
     </div>
-    
+
     <!-- FORMULARIO -->
     <div id="formContent" class="container hidden">
-        <div class="header">
-            <div class="logo-container">
-                <img src="https://i.imgur.com/fHV1Qo1.png" alt="Logo LSAF" class="logo">
-            </div>
-            <div class="header-text">
-                <h1>REGISTRO VEHICULAR LSAF</h1>
-                <p>Sistema de Gestión Vehicular</p>
-            </div>
-        </div>
-        
-        <div class="form-container">
-            <div class="info-box">
-                <i class="fas fa-info-circle"></i> Complete todos los campos obligatorios (*) para registrar el vehículo en el sistema.
-            </div>
-            
-            <div id="message" class="message"></div>
-            
-            <form id="vehicleForm">
-                <div class="form-section">
-                    <div class="form-section-title">
-                        <i class="fas fa-user"></i> Información Personal
-                    </div>
-                    <div class="form-group">
-                        <label for="nombre" class="required">Nombre y Apellido</label>
-                        <input type="text" id="nombre" name="nombre" required placeholder="Ej: David Toro">
-                    </div>
-                    
-                    <div class="two-columns">
-                        <div class="form-group">
-                            <label for="nuim" class="required">NUIM</label>
-                            <input type="text" id="nuim" name="nuim" required placeholder="Ej: #ABCD">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="telefono" class="required">Número de Teléfono</label>
-                            <input type="tel" id="telefono" name="telefono" required required placeholder="Ej: 123456">
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="form-section">
-                    <div class="form-section-title">
-                        <i class="fas fa-car"></i> Información del Vehículo
-                    </div>
-                    <div class="two-columns">
-                        <div class="form-group">
-                            <label for="marca" class="required">Marca del Vehículo</label>
-                            <input type="text" id="marca" name="marca" required placeholder="Ej: Gallivanter">
-                        </div>
-                        <div class="form-group">
-                            <label for="modelo" class="required">Modelo del Vehículo</label>
-                            <input type="text" id="modelo" name="modelo" required placeholder="Ej: Baller LE">
-                        </div>
-                    </div>
-                    <div class="two-columns">
-                        <div class="form-group">
-                            <label for="color" class="required">Color del Vehículo</label>
-                            <input type="text" id="color" name="color" required placeholder="Ej: Negro">
-                        </div>
-                        <div class="form-group">
-                            <label for="matricula" class="required">Matrícula del Vehículo</label>
-                            <input type="text" id="matricula" name="matricula" required placeholder="Ej: ABC-123">
-                        </div>
-                    </div>
-                </div>
-                
-                <button type="submit" id="submitBtn">
-                    <i class="fas fa-paper-plane"></i> Registrar Vehículo
-                </button>
-            </form>
-        </div>
+        <!-- ... Aquí va tu formulario existente ... -->
     </div>
-
-    
 
     <script>
         const passwordInput = document.getElementById('passwordInput');
@@ -207,19 +133,3 @@
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
