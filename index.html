@@ -158,22 +158,20 @@ const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwuZVRDOgShaXoDpfNKEG
 let _CODE = '';
 
 // Consultar contraseña actual
+function fetchCurrentCode() {
+  return new Promise((resolve) => {
+    window.callback = (data) => {
+      ACTIVE_CODE = data.currentCode;
+      console.log("Código recibido:", ACTIVE_CODE);
+      resolve();
+    };
 
-
-async function fetchCurrentCode() {
-  try {
-    const res = await fetch(SHEET_URL + "?t=" + new Date().getTime()); // evita cache
-    const text = await res.text();
-    console.log("Respuesta cruda:", text); // 👀 para ver qué devuelve GAS
-    const data = JSON.parse(text);
-    ACTIVE_CODE = data.currentCode;
-    console.log("Código actual recibido:", ACTIVE_CODE);
-  } catch(err) {
-    console.error("Error obteniendo código:", err);
-    document.getElementById('accessError').textContent = "Error al obtener el código.";
-  }
+    // carga dinámica
+    let script = document.createElement("script");
+    script.src = SHEET_URL + "?callback=callback&t=" + new Date().getTime();
+    document.body.appendChild(script);
+  });
 }
-
 
 
 // Validar acceso
@@ -226,6 +224,7 @@ setInterval(fetchCurrentCode, 10000);
 </script>
 </body>
 </html>
+
 
 
 
