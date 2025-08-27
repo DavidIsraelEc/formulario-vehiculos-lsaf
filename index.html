@@ -48,6 +48,7 @@
 </head>
 <body>
 
+<!-- SECCIÓN DE ACCESO -->
 <div id="accessSection" class="access-section">
     <div class="access-container">
         <h2><i class="fas fa-lock"></i> Sistema de Registro LSAF</h2>
@@ -58,7 +59,7 @@
         <button id="checkBtn">
             <i class="fas fa-unlock"></i> Verificar Acceso
         </button>
-        <p id="accessError" style="color: #fff; background: rgba(200, 0, 0, 0.5); padding: 10px; border-radius: 5px; display: none; margin-top: 15px;">
+        <p id="accessError" style="color: #fff; background: rgba(200,0,0,0.5); padding: 10px; border-radius: 5px; display: none; margin-top: 15px;">
             <i class="fas fa-exclamation-circle"></i> Código incorrecto o ya utilizado
         </p>
     </div>
@@ -95,9 +96,7 @@
 
         <form id="vehicleForm">
             <div class="form-section">
-                <div class="form-section-title">
-                    <i class="fas fa-user"></i> Información Personal
-                </div>
+                <div class="form-section-title"><i class="fas fa-user"></i> Información Personal</div>
                 <div class="form-group">
                     <label for="nombre" class="required">Nombre y Apellido</label>
                     <input type="text" id="nombre" name="nombre" required placeholder="Ej: David Toro">
@@ -115,9 +114,7 @@
             </div>
 
             <div class="form-section">
-                <div class="form-section-title">
-                    <i class="fas fa-car"></i> Información del Vehículo
-                </div>
+                <div class="form-section-title"><i class="fas fa-car"></i> Información del Vehículo</div>
                 <div class="two-columns">
                     <div class="form-group">
                         <label for="marca" class="required">Marca del Vehículo</label>
@@ -160,19 +157,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const messageBox = document.getElementById("message");
     const submitBtn = document.getElementById("submitBtn");
 
-    // Obtener el código actual del Google Apps Script
     async function fetchCurrentCode() {
-    try {
-        const res = await fetch(CURRENT_CODE_URL);
-        const json = await res.json(); // ya es JSON puro
-        return json.currentCode;
-    } catch (err) {
-        console.error("Error obteniendo código:", err);
-        return null;
+        try {
+            const res = await fetch(CURRENT_CODE_URL);
+            const json = await res.json(); // JSON puro desde Apps Script
+            return json.currentCode;
+        } catch (err) {
+            console.error("Error obteniendo código:", err);
+            return null;
+        }
     }
-}
 
-    // Verificar contraseña
     async function checkPassword() {
         const entered = passwordInput.value.trim();
         const currentCode = await fetchCurrentCode();
@@ -188,7 +183,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Enviar formulario
     async function submitForm(e) {
         e.preventDefault();
         submitBtn.disabled = true;
@@ -239,6 +233,7 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 </body>
 </html>
+
 
 
 
