@@ -154,43 +154,7 @@
         </div>
     </div>
 
-    </style>
-</head>
-<body>
-    <!-- SECCIÓN DE ACCESO -->
-    <div id="accessSection" class="access-section">
-        <div class="access-container">
-            <h2><i class="fas fa-lock"></i> Sistema de Registro LSAF</h2>
-            <p>Este formulario requiere un código de acceso válido</p>
-            
-            <div class="access-input">
-                <input type="password" id="passwordInput" placeholder="Ingrese la contraseña">
-            </div>
-
-            <button onclick="checkAccess()">
-                <i class="fas fa-unlock"></i> Verificar Acceso
-            </button>
-            
-            <p id="accessError" style="color: #fff; background: rgba(200, 0, 0, 0.5); padding: 10px; border-radius: 5px; display: none; margin-top: 15px;">
-                <i class="fas fa-exclamation-circle"></i> Código incorrecto o ya utilizado
-            </p>
-        </div>
-    </div>
-
-    <!-- ACCESO DENEGADO -->
-    <div id="accessDenied" class="container hidden">
-        <div class="access-denied">
-            <i class="fas fa-ban"></i>
-            <h2>Acceso Denegado</h2>
-            <p>El código de acceso ya fue utilizado o no es válido.</p>
-            <p>Contacta con Plana Mayor para registrar un nuevo vehículo.</p>
-        </div>
-    </div>
-
-    <!-- FORMULARIO -->
-    <div id="formContent" class="container hidden">
-        <!-- ... Aquí va tu formulario existente ... -->
-    </div>
+    
 
     <script>
         const passwordInput = document.getElementById('passwordInput');
@@ -243,6 +207,7 @@
     </script>
 </body>
 </html>
+
 
 
 
