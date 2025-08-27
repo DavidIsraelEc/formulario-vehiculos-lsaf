@@ -103,26 +103,6 @@
             color: #155724;
             border: 1px solid #c3e6cb;
         }
-        .error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        .history {
-            margin-top: 20px;
-            text-align: left;
-        }
-        .history h3 {
-            color: #2c3e50;
-            margin-bottom: 10px;
-        }
-        .history-list {
-            max-height: 150px;
-            overflow-y: auto;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 10px;
-        }
     </style>
 </head>
 <body>
@@ -154,24 +134,13 @@
                 <li>La contraseña anterior dejará de funcionar automáticamente</li>
             </ol>
         </div>
-        
-        <div class="history">
-            <h3><i class="fas fa-history"></i> Historial de Contraseñas</h3>
-            <div class="history-list" id="passwordHistory">
-                No hay contraseñas generadas aún
-            </div>
-        </div>
     </div>
 
     <script>
-        // Almacenamiento de contraseñas
-        const STORAGE_KEY = 'lsaf_passwords';
         let currentPassword = '';
         
-        // Cargar historial al iniciar
+        // Generar una contraseña automáticamente al cargar
         window.onload = function() {
-            loadPasswordHistory();
-            // Generar una contraseña automáticamente al cargar
             generatePassword();
         };
         
@@ -184,10 +153,7 @@
             document.getElementById('passwordDisplay').textContent = currentPassword;
             document.getElementById('message').style.display = 'none';
             
-            // Guardar en el historial
-            saveToHistory(currentPassword);
-            
-            // Actualizar el formulario principal (esto requiere una modificación mínima)
+            // Actualizar el formulario principal
             updateMainFormPassword(currentPassword);
         }
         
@@ -213,48 +179,8 @@
                 });
         }
         
-        function saveToHistory(password) {
-            // Obtener historial existente
-            let history = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-            
-            // Agregar nueva contraseña con timestamp
-            history.unshift({
-                password: password,
-                timestamp: new Date().toLocaleString('es-ES')
-            });
-            
-            // Mantener solo las últimas 10 contraseñas
-            if (history.length > 10) {
-                history = history.slice(0, 10);
-            }
-            
-            // Guardar en localStorage
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
-            
-            // Actualizar visualización
-            loadPasswordHistory();
-        }
-        
-        function loadPasswordHistory() {
-            const history = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-            const historyElement = document.getElementById('passwordHistory');
-            
-            if (history.length === 0) {
-                historyElement.innerHTML = 'No hay contraseñas generadas aún';
-                return;
-            }
-            
-            historyElement.innerHTML = history.map(item => 
-                `<div style="margin-bottom: 8px; padding: 5px; border-bottom: 1px solid #eee;">
-                    <strong>${item.password}</strong> 
-                    <span style="font-size: 12px; color: #666;">(${item.timestamp})</span>
-                </div>`
-            ).join('');
-        }
-        
         function updateMainFormPassword(newPassword) {
-            // Esta función intenta actualizar el formulario principal
-            // Nota: Esto requiere que ambos archivos estén en el mismo dominio
+            // Esta función actualiza el formulario principal
             try {
                 // Guardar en localStorage para que el formulario principal lo detecte
                 localStorage.setItem('lsaf_current_password', newPassword);
@@ -282,13 +208,6 @@
                 messageDiv.style.display = 'none';
             }, 3000);
         }
-        
-        // Escuchar mensajes desde el formulario principal
-        window.addEventListener('message', function(event) {
-            if (event.data.type === 'REQUEST_PASSWORD') {
-                generatePassword();
-            }
-        });
     </script>
 </body>
 </html>
