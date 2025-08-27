@@ -48,7 +48,6 @@
 </head>
 <body>
 
-<!-- SECCIÓN DE ACCESO -->
 <div id="accessSection" class="access-section">
     <div class="access-container">
         <h2><i class="fas fa-lock"></i> Sistema de Registro LSAF</h2>
@@ -56,7 +55,7 @@
         <div class="access-input">
             <input type="password" id="passwordInput" placeholder="Ingrese la contraseña">
         </div>
-        <button onclick="checkPassword()">
+        <button id="checkBtn">
             <i class="fas fa-unlock"></i> Verificar Acceso
         </button>
         <p id="accessError" style="color: #fff; background: rgba(200, 0, 0, 0.5); padding: 10px; border-radius: 5px; display: none; margin-top: 15px;">
@@ -149,95 +148,98 @@
 </div>
 
 <script>
-        const CURRENT_CODE_URL = "https://script.google.com/macros/s/AKfycbwuZVRDOgShaXoDpfNKEG6UvO9FQ_Uh0ULlV9XOvntESC_hR0Xslz-yadDb-CkRolR_/exec";
+const CURRENT_CODE_URL = "https://script.google.com/macros/s/AKfycbwuZVRDOgShaXoDpfNKEG6UvO9FQ_Uh0ULlV9XOvntESC_hR0Xslz-yadDb-CkRolR_/exec";
 
-        document.addEventListener("DOMContentLoaded", () => {
-            const checkBtn = document.getElementById("checkBtn");
-            const vehicleForm = document.getElementById("vehicleForm");
-            const passwordInput = document.getElementById("passwordInput");
-            const accessError = document.getElementById("accessError");
-            const accessSection = document.getElementById("accessSection");
-            const formContent = document.getElementById("formContent");
-            const messageBox = document.getElementById("message");
-            const submitBtn = document.getElementById("submitBtn");
+document.addEventListener("DOMContentLoaded", () => {
+    const checkBtn = document.getElementById("checkBtn");
+    const vehicleForm = document.getElementById("vehicleForm");
+    const passwordInput = document.getElementById("passwordInput");
+    const accessError = document.getElementById("accessError");
+    const accessSection = document.getElementById("accessSection");
+    const formContent = document.getElementById("formContent");
+    const messageBox = document.getElementById("message");
+    const submitBtn = document.getElementById("submitBtn");
 
-            async function fetchCurrentCode() {
-                try {
-                    const res = await fetch(CURRENT_CODE_URL + "?callback=callback");
-                    const text = await res.text();
-                    const json = JSON.parse(text.replace(/^callback\(/, '').replace(/\);$/, ''));
-                    return json.currentCode;
-                } catch (err) {
-                    console.error("Error obteniendo código:", err);
-                    return null;
-                }
+    // Obtener el código actual del Google Apps Script
+    async function fetchCurrentCode() {
+        try {
+            const res = await fetch(CURRENT_CODE_URL);
+            const json = await res.json();
+            return json.currentCode;
+        } catch (err) {
+            console.error("Error obteniendo código:", err);
+            return null;
+        }
+    }
+
+    // Verificar contraseña
+    async function checkPassword() {
+        const entered = passwordInput.value.trim();
+        const currentCode = await fetchCurrentCode();
+        console.log("Contraseña ingresada:", entered);
+        console.log("Código actual recibido:", currentCode);
+
+        if (entered === currentCode) {
+            accessSection.classList.add("hidden");
+            formContent.classList.remove("hidden");
+        } else {
+            accessError.classList.remove("hidden");
+            setTimeout(() => accessError.classList.add("hidden"), 3000);
+        }
+    }
+
+    // Enviar formulario
+    async function submitForm(e) {
+        e.preventDefault();
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="loading-spinner"></span> Cargando...';
+
+        const formData = {
+            nombre: document.getElementById("nombre").value,
+            nuim: document.getElementById("nuim").value,
+            telefono: document.getElementById("telefono").value,
+            marca: document.getElementById("marca").value,
+            modelo: document.getElementById("modelo").value,
+            color: document.getElementById("color").value,
+            matricula: document.getElementById("matricula").value
+        };
+
+        try {
+            const res = await fetch(CURRENT_CODE_URL + "?method=addRegistro", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(formData)
+            });
+
+            const result = await res.json();
+            if (result.status === "success") {
+                messageBox.textContent = "Registro enviado con éxito!";
+                messageBox.className = "message success";
+                messageBox.style.display = "block";
+                vehicleForm.reset();
+            } else {
+                messageBox.textContent = "Error al enviar registro.";
+                messageBox.className = "message error";
+                messageBox.style.display = "block";
             }
+        } catch (err) {
+            console.error(err);
+            messageBox.textContent = "Error al enviar registro.";
+            messageBox.className = "message error";
+            messageBox.style.display = "block";
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Registrar Vehículo';
+        }
+    }
 
-            async function checkPassword() {
-                const entered = passwordInput.value.trim();
-                const currentCode = await fetchCurrentCode();
-                console.log("Contraseña ingresada:", entered);
-                console.log("Código actual recibido:", currentCode);
-
-                if (entered === currentCode) {
-                    accessSection.classList.add("hidden");
-                    formContent.classList.remove("hidden");
-                } else {
-                    accessError.classList.remove("hidden");
-                    setTimeout(() => accessError.classList.add("hidden"), 3000);
-                }
-            }
-
-            async function submitForm(e) {
-                e.preventDefault();
-                submitBtn.disabled = true;
-                submitBtn.textContent = "Cargando...";
-
-                const formData = {
-                    nombre: document.getElementById("nombre").value,
-                    nuim: document.getElementById("nuim").value,
-                    telefono: document.getElementById("telefono").value,
-                    marca: document.getElementById("marca").value,
-                    modelo: document.getElementById("modelo").value,
-                    color: document.getElementById("color").value,
-                    matricula: document.getElementById("matricula").value
-                };
-
-                try {
-                    const res = await fetch(CURRENT_CODE_URL + "?method=addRegistro", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(formData)
-                    });
-
-                    const result = await res.json();
-                    if (result.status === "success") {
-                        messageBox.textContent = "Registro enviado con éxito!";
-                        messageBox.className = "message success";
-                        messageBox.style.display = "block";
-                        vehicleForm.reset();
-                    } else {
-                        messageBox.textContent = "Error al enviar registro.";
-                        messageBox.className = "message error";
-                        messageBox.style.display = "block";
-                    }
-                } catch (err) {
-                    console.error(err);
-                    messageBox.textContent = "Error al enviar registro.";
-                    messageBox.className = "message error";
-                    messageBox.style.display = "block";
-                } finally {
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Registrar Vehículo';
-                }
-            }
-
-            checkBtn.addEventListener("click", checkPassword);
-            vehicleForm.addEventListener("submit", submitForm);
-        });
-    </script>
+    checkBtn.addEventListener("click", checkPassword);
+    vehicleForm.addEventListener("submit", submitForm);
+});
+</script>
 </body>
 </html>
+
 
 
 
