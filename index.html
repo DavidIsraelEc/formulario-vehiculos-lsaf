@@ -94,16 +94,21 @@
         let currentCode = null;
 
         async function fetchCurrentCode() {
-            try {
-                const res = await fetch(CURRENT_CODE_URL + "?" + Date.now());
-                const code = await res.text();
-                console.log("Código actual recibido:", code.trim());
-                return code.trim();
-            } catch (err) {
-                console.error("Error obteniendo código:", err);
-                return null;
-            }
-        }
+    try {
+        const res = await fetch(CURRENT_CODE_URL + "?" + Date.now());
+        const text = await res.text();
+
+        // Extraer JSON de la respuesta tipo JSONP
+        const jsonString = text.replace(/^callback\(/, '').replace(/\)$/, '');
+        const data = JSON.parse(jsonString);
+
+        console.log("Código actual recibido:", data.currentCode);
+        return data.currentCode;
+    } catch (err) {
+        console.error("Error obteniendo código:", err);
+        return null;
+    }
+}
 
         async function checkAccess() {
             const enteredCode = passwordInput.value.trim();
@@ -133,3 +138,4 @@
     </script>
 </body>
 </html>
+
