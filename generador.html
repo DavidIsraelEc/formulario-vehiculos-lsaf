@@ -2,24 +2,26 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Generador de Contraseña - LSAF</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generador de Contraseña</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #f3f4f6;
+      margin: 0;
+      height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
-      margin: 0;
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+      font-family: Arial, sans-serif;
     }
-    .container {
+    .card {
       background: white;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      padding: 40px;
+      border-radius: 15px;
       text-align: center;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.25);
       width: 350px;
+      animation: fadeIn 1s ease-in-out;
     }
     h2 {
       margin-bottom: 20px;
@@ -44,25 +46,28 @@
       font-size: 18px;
       color: #16a34a;
       font-weight: bold;
+      min-height: 30px;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="card">
     <h2>Generador de Contraseña</h2>
     <button onclick="generarPassword()">Generar contraseña</button>
     <div class="resultado" id="resultado"></div>
   </div>
 
   <script>
-    // Tu URL del WebApp de Google Apps Script
+    // URL de tu WebApp publicado
     const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwjC9OvoHQOqksobwRntn-5GP-DsWLyzIo3SciHVnS5VhirVcdc0iitVKfezUiqH8FO/exec";
 
     function generarPassword() {
-      // Genera una contraseña aleatoria con prefijo
       const nueva = "LSAF-" + Math.floor(Math.random() * 100000);
 
-      // Enviar al WebApp
       fetch(WEBAPP_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -75,7 +80,7 @@
       .then(data => {
         if (data.success) {
           document.getElementById("resultado").innerText = 
-            "Contraseña actualizada: " + data.password;
+            "Nueva contraseña: " + data.password;
         } else {
           document.getElementById("resultado").innerText = 
             "⚠️ Error: " + data.message;
@@ -84,7 +89,7 @@
       .catch(err => {
         console.error("Error de conexión:", err);
         document.getElementById("resultado").innerText = 
-          "❌ Error de conexión: revisa permisos del WebApp";
+          "❌ Error de conexión. Revisa permisos del WebApp.";
       });
     }
   </script>
