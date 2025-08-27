@@ -153,14 +153,15 @@
         </div>
     </div>
 
-    <>
+    <script>
+        // NUEVA ID DE IMPLEMENTACIÓN - ACTUALIZADA
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyb_ej-KYxmDgKuT-rtd1FY__b-ZLTWHwipnLPsbGitFyuM7idb1sOZSvCHJ2GEKXRN/exec';
         let currentPassword = '';
 
         // Cargar contraseña actual al iniciar
         window.onload = async function() {
             try {
-                const response = await fetch(`${SCRIPT_URL}?action=getPassword`);
+                const response = await fetch(`${SCRIPT_URL}?action=getPassword&t=${new Date().getTime()}`);
                 if (!response.ok) {
                     throw new Error(`Error HTTP: ${response.status}`);
                 }
@@ -172,10 +173,12 @@
                     document.getElementById('passwordDisplay').textContent = currentPassword;
                 } else {
                     document.getElementById('passwordDisplay').textContent = 'LSAF2025 (predeterminada)';
+                    currentPassword = 'LSAF2025';
                 }
             } catch (error) {
                 console.log('Error al cargar contraseña:', error);
                 document.getElementById('passwordDisplay').textContent = 'LSAF2025 (predeterminada)';
+                currentPassword = 'LSAF2025';
                 showMessage('Error al cargar contraseña. Usando valor predeterminado.', 'error');
             }
         };
