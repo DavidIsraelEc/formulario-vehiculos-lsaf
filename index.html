@@ -179,13 +179,15 @@ function checkAccess() {
 }
 
 // Manejar envío del formulario
-document.getElementById("vehicleForm").addEventListener("submit", async function(e){
+document.getElementById("vehicleForm").addEventListener("submit", async function(e) {
     e.preventDefault();
-    const submitBtn = document.getElementById("submitBtn");
-    const messageDiv = document.getElementById("formMessage");
 
+    const submitBtn = document.getElementById("submitBtn");
+    const originalText = submitBtn.innerHTML;
+
+    // Deshabilitar botón y mostrar cargando
     submitBtn.disabled = true;
-    submitBtn.innerText = "Cargando...";
+    submitBtn.innerHTML = '<span class="loading-spinner"></span> Registrando...';
 
     const formData = {
         nombre: document.getElementById("nombre").value,
@@ -198,32 +200,31 @@ document.getElementById("vehicleForm").addEventListener("submit", async function
     };
 
     try {
-        const response = await fetch(WEB_APP_URL, {
+        const response = await fetch(CURRENT_CODE_URL + "?action=submit", {
             method: "POST",
             body: JSON.stringify(formData)
         });
+
         const result = await response.json();
 
-        if(result.success){
-            messageDiv.className = "message success";
-            messageDiv.innerText = "¡Registro enviado con éxito!";
-            messageDiv.style.display = "block";
+        if (result.status === "success") {
+            document.getElementById("message").className = "message success";
+            document.getElementById("message").innerText = "Vehículo registrado correctamente!";
             document.getElementById("vehicleForm").reset();
         } else {
-            messageDiv.className = "message error";
-            messageDiv.innerText = "Error: " + result.error;
-            messageDiv.style.display = "block";
+            document.getElementById("message").className = "message error";
+            document.getElementById("message").innerText = "Error registrando el vehículo.";
         }
-    } catch(err) {
-        messageDiv.className = "message error";
-        messageDiv.innerText = "Error al enviar datos: " + err.message;
-        messageDiv.style.display = "block";
+    } catch (err) {
+        document.getElementById("message").className = "message error";
+        document.getElementById("message").innerText = "Error de conexión al servidor.";
+        console.error(err);
+    } finally {
+        // Habilitar el botón de nuevo y restaurar texto
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
     }
-
-    submitBtn.disabled = false;
-    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Registrar Vehículo';
 });
-
 // Actualizar código al cargar
 fetchCurrentCode();
 setInterval(fetchCurrentCode, 30000); // actualizar cada 30s
@@ -231,4 +232,5 @@ setInterval(fetchCurrentCode, 30000); // actualizar cada 30s
 
 </body>
 </html>
+
 
