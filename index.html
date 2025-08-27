@@ -149,70 +149,87 @@
 </div>
 
 <script>
-    const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwuZVRDOgShaXoDpfNKEG6UvO9FQ_Uh0ULlV9XOvntESC_hR0Xslz-yadDb-CkRolR_/exec";
+const CURRENT_CODE_URL = "https://script.google.com/macros/s/AKfycbwuZVRDOgShaXoDpfNKEG6UvO9FQ_Uh0ULlV9XOvntESC_hR0Xslz-yadDb-CkRolR_/exec";
+const REGISTER_URL = CURRENT_CODE_URL;
 
-    // Validar contraseña
-    function checkPassword() {
-      const passwordInput = document.getElementById("passwordInput").value;
+const accessSection = document.getElementById("accessSection");
+const formContent = document.getElementById("formContent");
+const accessError = document.getElementById("accessError");
+const checkBtn = document.getElementById("checkBtn");
+const passwordInput = document.getElementById("passwordInput");
+const vehicleForm = document.getElementById("vehicleForm");
+const submitBtn = document.getElementById("submitBtn");
+const messageDiv = document.getElementById("message");
 
-      fetch(WEBAPP_URL)
-        .then(res => res.json())
-        .then(data => {
-          console.log("Código actual recibido:", data.currentCode);
+async function checkPassword() {
+    accessError.style.display = "none";
+    const entered = passwordInput.value.trim();
+    if (!entered) return;
 
-          if (passwordInput === data.currentCode) {
-            console.log("Contraseña válida");
-            document.getElementById("formContainer").classList.remove("hidden");
-            document.getElementById("loginContainer").classList.add("hidden");
-          } else {
-            alert("Contraseña incorrecta");
-          }
-        })
-        .catch(err => console.error("Error obteniendo código:", err));
+    try {
+        const res = await fetch(CURRENT_CODE_URL);
+        const data = await res.json();
+        const currentCode = data.currentCode;
+        console.log("Código actual recibido:", currentCode);
+        console.log("Contraseña ingresada:", entered);
+
+        if (entered === currentCode) {
+            accessSection.classList.add("hidden");
+            formContent.classList.remove("hidden");
+        } else {
+            accessError.style.display = "block";
+        }
+    } catch (err) {
+        console.error("Error obteniendo código:", err);
+        accessError.style.display = "block";
     }
+}
 
-    // Registrar vehículo
-    function registrar() {
-      const btn = document.getElementById("submitBtn");
-      const msg = document.getElementById("mensaje");
+checkBtn.addEventListener("click", checkPassword);
 
-      const data = {
+vehicleForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Cargando...";
+
+    const data = {
         nombre: document.getElementById("nombre").value,
         nuim: document.getElementById("nuim").value,
         telefono: document.getElementById("telefono").value,
         marca: document.getElementById("marca").value,
         modelo: document.getElementById("modelo").value,
         color: document.getElementById("color").value,
-        matricula: document.getElementById("matricula").value,
-      };
+        matricula: document.getElementById("matricula").value
+    };
 
-      btn.disabled = true;
-      btn.textContent = "Cargando...";
+    try {
+        const res = await fetch(REGISTER_URL, {
+            method: "POST",
+            body: JSON.stringify(data)
+        });
+        const result = await res.json();
 
-      fetch(WEBAPP_URL, {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: { "Content-Type": "application/json" }
-      })
-      .then(res => res.json())
-      .then(result => {
         if (result.success) {
-          msg.classList.remove("hidden");
-          setTimeout(() => msg.classList.add("hidden"), 3000);
+            messageDiv.textContent = "¡Registro exitoso!";
+            messageDiv.className = "success";
+            vehicleForm.reset();
         } else {
-          alert("Error al registrar");
+            messageDiv.textContent = "Error: " + (result.error || "No se pudo registrar");
+            messageDiv.className = "error";
         }
-      })
-      .catch(err => console.error("Error:", err))
-      .finally(() => {
-        btn.disabled = false;
-        btn.textContent = "Registrar Vehículo";
-      });
+    } catch (err) {
+        messageDiv.textContent = "Error al registrar: " + err.message;
+        messageDiv.className = "error";
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Registrar Vehículo";
     }
-  </script>
+});
+</script>
 
 </body>
 </html>
+
 
 
 
