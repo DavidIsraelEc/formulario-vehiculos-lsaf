@@ -96,7 +96,6 @@ const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwjC9OvoHQOqksobwRnt
 let ACTIVE_CODE = 'LSAF2025';
 const USED_KEY = 'used_code';
 
-// Cargar contraseña desde Sheet usando JSONP
 function loadPassword() {
     return new Promise(resolve=>{
         const cb='cb'+Math.random().toString(36).substr(2,5);
@@ -107,7 +106,6 @@ function loadPassword() {
     });
 }
 
-// Verificar acceso
 async function checkAccess() {
     await loadPassword();
     const code = document.getElementById('accessCode').value.trim();
@@ -138,5 +136,7 @@ window.onload=async function(){
 };
 </script>
 
+
 </body>
 </html>
+
