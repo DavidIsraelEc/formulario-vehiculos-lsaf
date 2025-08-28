@@ -146,7 +146,6 @@
 
 <script>
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbweRHx85wET9LtNWQdiC_8cpiIW29vJqYUZU6UHi4JKjSn3z_gTkipuMt_fniR7lfA/exec';
-const USED_KEY = "used_code";
 
 let ACTIVE_CODE = null;
 let currentCode = null;
@@ -170,11 +169,17 @@ function makeGetRequest(url, callback) {
 function handlePasswordResponse(data) {
     if (data && data.password) {
         ACTIVE_CODE = data.password;
-        checkAccessAfterLoad();
+        
+        // Verificar si el código ya ha sido utilizado
+        if (data.used) {
+            showAccessDenied();
+        } else {
+            checkAccessAfterLoad();
+        }
     }
 }
 
-async function loadCurrentPassword() {
+function loadCurrentPassword() {
     try {
         // Usamos JSONP para evitar CORS
         makeGetRequest(`${SCRIPT_URL}?action=getPassword&t=${Date.now()}`, handlePasswordResponse);
@@ -187,12 +192,6 @@ function checkAccessAfterLoad() {
     let codeToCheck = accessCodeInput.value.trim();
     if(!codeToCheck) {
         showError("Por favor ingresa un código");
-        resetCheckBtn();
-        return;
-    }
-
-    if(localStorage.getItem(USED_KEY) === ACTIVE_CODE) {
-        showAccessDenied();
         resetCheckBtn();
         return;
     }
@@ -211,7 +210,7 @@ async function checkAccess() {
     checkBtn.disabled = true;
     checkBtn.innerHTML = '<span class="loading-spinner"></span> Verificando...';
 
-    await loadCurrentPassword();
+    loadCurrentPassword();
 }
 
 function resetCheckBtn() {
@@ -245,7 +244,6 @@ function handleFormResponse(data) {
         messageDiv.textContent = "¡Vehículo registrado correctamente!";
         messageDiv.className = "message success";
         form.reset();
-        if(currentCode) localStorage.setItem(USED_KEY, currentCode);
     } else {
         messageDiv.textContent = "Error: " + (data ? data.message : "Error desconocido");
         messageDiv.className = "message error";
@@ -273,7 +271,8 @@ form.addEventListener('submit', function(e){
         marca: document.getElementById('marca').value,
         modelo: document.getElementById('modelo').value,
         color: document.getElementById('color').value,
-        matricula: document.getElementById('matricula').value
+        matricula: document.getElementById('matricula').value,
+        accessCode: currentCode  // Añadimos el código de acceso actual
     };
 
     messageDiv.textContent = "Enviando datos al sistema...";
@@ -294,11 +293,9 @@ form.addEventListener('submit', function(e){
 });
 
 // Inicialización al cargar la página
-window.onload = async function(){
-    await loadCurrentPassword();
-    if(localStorage.getItem(USED_KEY) === ACTIVE_CODE) showAccessDenied();
+window.onload = function(){
+    loadCurrentPassword();
 }
 </script>
 </body>
 </html>
-
