@@ -162,8 +162,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
    async function fetchCurrentCode() {
     try {
-        const res = await fetch(CURRENT_CODE_URL);  // sin callback
-        const json = await res.json();              // parsea JSON directamente
+        const res = await fetch(CURRENT_CODE_URL);
+        const json = await res.json(); // JSON puro
         return json.currentCode;
     } catch (err) {
         console.error("Error obteniendo código:", err);
@@ -237,6 +237,7 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 </body>
 </html>
+
 
 
 
