@@ -236,7 +236,8 @@ form.addEventListener('submit', function(e){
         marca: document.getElementById('marca').value,
         modelo: document.getElementById('modelo').value,
         color: document.getElementById('color').value,
-        matricula: document.getElementById('matricula').value
+        matricula: document.getElementById('matricula').value,
+        action: "registrarVehiculo" // Añadimos acción específica
     };
 
     messageDiv.textContent = "Enviando datos al sistema...";
@@ -245,31 +246,31 @@ form.addEventListener('submit', function(e){
 
     fetch(SCRIPT_URL, {
         method: 'POST',
-        mode: 'no-cors',
         headers: {'Content-Type':'application/json'},
         body: JSON.stringify(formData)
     })
-    .then(()=> {
-        messageDiv.textContent = "¡Vehículo registrado correctamente!";
-        messageDiv.className = "message success";
-        form.reset();
-        if(currentCode) localStorage.setItem(USED_KEY, currentCode);
-
+    .then(response => response.json())
+    .then(data => {
+        if(data.result === "success") {
+            messageDiv.textContent = "¡Vehículo registrado correctamente!";
+            messageDiv.className = "message success";
+            form.reset();
+            if(currentCode) localStorage.setItem(USED_KEY, currentCode);
+        } else {
+            throw new Error(data.error);
+        }
+    })
+    .catch(error => {
+        messageDiv.textContent = "Error al enviar los datos, inténtalo de nuevo.";
+        messageDiv.className = "message error";
+        console.error(error);
+    })
+    .finally(() => {
         setTimeout(()=> {
             isSubmitting = false;
             submitBtn.disabled = false;
             submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Registrar Vehículo';
-        },2000);
-    })
-    .catch(error=>{
-        messageDiv.textContent = "Error al enviar los datos, inténtalo de nuevo.";
-        messageDiv.className = "message error";
-        console.error(error);
-        setTimeout(()=> {
-            isSubmitting=false;
-            submitBtn.disabled=false;
-            submitBtn.innerHTML='<i class="fas fa-paper-plane"></i> Registrar Vehículo';
-        },2000);
+        }, 2000);
     });
 });
 
