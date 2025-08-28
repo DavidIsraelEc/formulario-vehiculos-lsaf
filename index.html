@@ -6,6 +6,7 @@
 <title>Registro Vehicular LSAF</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
+    /* Tus estilos CSS existentes se mantienen igual */
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     body { background: linear-gradient(135deg, #0d2c46 0%, #1a4d79 100%); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
     .container { background-color: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); width: 100%; max-width: 750px; overflow: hidden; }
@@ -157,22 +158,32 @@ const accessError = document.getElementById('accessError');
 const accessCodeInput = document.getElementById('accessCode');
 const checkBtn = document.getElementById('checkBtn');
 
+// Función para hacer solicitudes GET sin problemas de CORS
+function makeGetRequest(url, callback) {
+    const script = document.createElement('script');
+    script.src = `${url}&callback=${callback.name}`;
+    document.body.appendChild(script);
+    document.body.removeChild(script);
+}
+
+// Función para procesar la respuesta de la contraseña
+function handlePasswordResponse(data) {
+    if (data && data.password) {
+        ACTIVE_CODE = data.password;
+        checkAccessAfterLoad();
+    }
+}
+
 async function loadCurrentPassword() {
     try {
-        const response = await fetch(`${SCRIPT_URL}?action=getPassword&t=${Date.now()}`);
-        const data = await response.json();
-        if(data.password) ACTIVE_CODE = data.password;
+        // Usamos JSONP para evitar CORS
+        makeGetRequest(`${SCRIPT_URL}?action=getPassword&t=${Date.now()}`, handlePasswordResponse);
     } catch (error) {
         console.error('Error al cargar contraseña:', error);
     }
 }
 
-async function checkAccess() {
-    checkBtn.disabled = true;
-    checkBtn.innerHTML = '<span class="loading-spinner"></span> Verificando...';
-
-    await loadCurrentPassword();
-
+function checkAccessAfterLoad() {
     let codeToCheck = accessCodeInput.value.trim();
     if(!codeToCheck) {
         showError("Por favor ingresa un código");
@@ -194,6 +205,13 @@ async function checkAccess() {
         showError("Código incorrecto");
     }
     resetCheckBtn();
+}
+
+async function checkAccess() {
+    checkBtn.disabled = true;
+    checkBtn.innerHTML = '<span class="loading-spinner"></span> Verificando...';
+
+    await loadCurrentPassword();
 }
 
 function resetCheckBtn() {
@@ -221,7 +239,26 @@ const submitBtn = document.getElementById('submitBtn');
 const messageDiv = document.getElementById('message');
 let isSubmitting = false;
 
-form.addEventListener('submit', async function(e){
+// Función para procesar la respuesta del formulario
+function handleFormResponse(data) {
+    if (data && data.result === "success") {
+        messageDiv.textContent = "¡Vehículo registrado correctamente!";
+        messageDiv.className = "message success";
+        form.reset();
+        if(currentCode) localStorage.setItem(USED_KEY, currentCode);
+    } else {
+        messageDiv.textContent = "Error: " + (data ? data.message : "Error desconocido");
+        messageDiv.className = "message error";
+    }
+    
+    setTimeout(() => {
+        isSubmitting = false;
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Registrar Vehículo';
+    }, 2000);
+}
+
+form.addEventListener('submit', function(e){
     e.preventDefault();
     if(isSubmitting) return;
 
@@ -243,38 +280,17 @@ form.addEventListener('submit', async function(e){
     messageDiv.className = "message";
     messageDiv.style.display = "block";
 
-    try {
-        // Usamos fetch con CORS para poder leer la respuesta
-        const response = await fetch(SCRIPT_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(formData)
-        });
-        
-        const result = await response.json();
-        
-        if (result.result === "success") {
-            messageDiv.textContent = "¡Vehículo registrado correctamente!";
-            messageDiv.className = "message success";
-            form.reset();
-            if(currentCode) localStorage.setItem(USED_KEY, currentCode);
-        } else {
-            messageDiv.textContent = "Error: " + result.message;
-            messageDiv.className = "message error";
-        }
-    } catch (error) {
-        messageDiv.textContent = "Error al enviar los datos, inténtalo de nuevo.";
-        messageDiv.className = "message error";
-        console.error(error);
-    } finally {
-        setTimeout(() => {
-            isSubmitting = false;
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Registrar Vehículo';
-        }, 2000);
+    // Usamos JSONP para enviar los datos sin problemas de CORS
+    const params = new URLSearchParams();
+    for (const key in formData) {
+        params.append(key, formData[key]);
     }
+    
+    // Crear un script para enviar los datos vía GET (JSONP)
+    const script = document.createElement('script');
+    script.src = `${SCRIPT_URL}?${params.toString()}&callback=handleFormResponse`;
+    document.body.appendChild(script);
+    document.body.removeChild(script);
 });
 
 // Inicialización al cargar la página
