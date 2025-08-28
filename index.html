@@ -136,93 +136,54 @@
         </form>
     </div>
 </div>
-
 <script>
-const CURRENT_CODE_URL = "https://script.google.com/macros/s/AKfycbwuZVRDOgShaXoDpfNKEG6UvO9FQ_Uh0ULlV9XOvntESC_hR0Xslz-yadDb-CkRolR_/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwuZVRDOgShaXoDpfNKEG6UvO9FQ_Uh0ULlV9XOvntESC_hR0Xslz-yadDb-CkRolR_/exec"; 
+    let ACTIVE_CODE = null;
 
-document.addEventListener("DOMContentLoaded", () => {
-    const checkBtn = document.getElementById("checkBtn");
-    const vehicleForm = document.getElementById("vehicleForm");
-    const passwordInput = document.getElementById("passwordInput");
-    const accessError = document.getElementById("accessError");
-    const accessSection = document.getElementById("accessSection");
-    const formContent = document.getElementById("formContent");
-    const messageBox = document.getElementById("message");
-    const submitBtn = document.getElementById("submitBtn");
-
-    async function fetchCurrentCode() {
-    try {
-        const res = await fetch(CURRENT_CODE_URL);
-        const json = await res.json();
-        return json.currentCode;
-    } catch (err) {
-        console.error("Error obteniendo código:", err);
-        return null;
-    }
-}
-
-
-    async function fetchCurrentCode() {
-    try {
-        const res = await fetch(CURRENT_CODE_URL);
-        const json = await res.json();
-        return json.currentCode;
-    } catch (err) {
-        console.error("Error obteniendo código:", err);
-        return null;
-    }
-}
-
-
-    async function submitForm(e) {
-        e.preventDefault();
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<span class="loading-spinner"></span> Cargando...';
-
-        const formData = {
-            nombre: document.getElementById("nombre").value,
-            nuim: document.getElementById("nuim").value,
-            telefono: document.getElementById("telefono").value,
-            marca: document.getElementById("marca").value,
-            modelo: document.getElementById("modelo").value,
-            color: document.getElementById("color").value,
-            matricula: document.getElementById("matricula").value
-        };
-
-        try {
-            const res = await fetch(CURRENT_CODE_URL + "?method=addRegistro", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData)
-            });
-            const result = await res.json();
-            if (result.status === "success") {
-                messageBox.textContent = "Registro enviado con éxito!";
-                messageBox.className = "message success";
-                messageBox.style.display = "block";
-                vehicleForm.reset();
-            } else {
-                messageBox.textContent = "Error al enviar registro.";
-                messageBox.className = "message error";
-                messageBox.style.display = "block";
-            }
-        } catch (err) {
-            console.error(err);
-            messageBox.textContent = "Error al enviar registro.";
-            messageBox.className = "message error";
-            messageBox.style.display = "block";
-        } finally {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Registrar Vehículo';
+    // 🔹 Cargar contraseña desde Google Sheets
+    async function loadCurrentPassword() {
+      try {
+        const response = await fetch(SCRIPT_URL);
+        const data = await response.json();
+        if (data.password) {
+          ACTIVE_CODE = data.password.trim();
+          console.log("🔑 Contraseña cargada dinámicamente:", ACTIVE_CODE);
+        } else {
+          console.error("No se encontró contraseña en la hoja.");
         }
+      } catch (error) {
+        console.error("Error cargando contraseña:", error);
+      }
     }
 
-    checkBtn.addEventListener("click", checkPassword);
-    vehicleForm.addEventListener("submit", submitForm);
-});
-</script>
+    // 🔹 Validar contraseña ingresada
+    async function checkPassword() {
+      const inputPass = document.getElementById("password").value.trim();
+      document.getElementById("error").textContent = "";
+
+      if (!ACTIVE_CODE) {
+        document.getElementById("error").textContent = "No se pudo cargar la contraseña. Intente más tarde.";
+        return;
+      }
+
+      console.log("Contraseña ingresada:", inputPass);
+      console.log("Código actual recibido:", ACTIVE_CODE);
+
+      if (inputPass === ACTIVE_CODE) {
+        alert("✅ Acceso concedido");
+        // Aquí rediriges a tu formulario
+        window.location.href = "formulario.html";
+      } else {
+        document.getElementById("error").textContent = "❌ Contraseña incorrecta";
+      }
+    }
+
+    // Ejecutar carga inicial
+    document.addEventListener("DOMContentLoaded", loadCurrentPassword);
+  </script>
 </body>
 </html>
+
 
 
 
