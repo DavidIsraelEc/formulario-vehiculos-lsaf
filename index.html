@@ -8,10 +8,10 @@
 <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     body { background: linear-gradient(135deg, #0d2c46 0%, #1a4d79 100%); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
-    .container { background-color: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); width: 100%; max-width: 750px; overflow: hidden; }
+    .container { background-color: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); width: 100%; max-width: 750px; overflow: hidden; }
     .header { background: linear-gradient(135deg, #0056b3 0%, #003a75 100%); color: white; padding: 25px; text-align: center; display: flex; align-items: center; justify-content: center; gap: 20px; flex-wrap: wrap; }
     .logo-container { display: flex; align-items: center; }
-    .logo { width: 80px; height: 80px; border-radius: 50%; background-color: white; padding: 10px; box-shadow: 0 0 15px rgba(0,0,0,0.2); }
+    .logo { width: 80px; height: 80px; border-radius: 50%; background-color: white; padding: 10px; box-shadow: 0 0 15px rgba(0, 0, 0, 0.2); }
     .header-text { text-align: center; }
     .header h1 { font-size: 32px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1.5px; }
     .header p { opacity: 0.9; font-size: 18px; }
@@ -19,11 +19,11 @@
     .form-group { margin-bottom: 20px; }
     label { display: block; margin-bottom: 8px; font-weight: 600; color: #2c3e50; }
     input, select { width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; transition: all 0.3s; }
-    input:focus, select:focus { border-color: #0056b3; outline: none; box-shadow: 0 0 0 3px rgba(0,86,179,0.2); }
+    input:focus, select:focus { border-color: #0056b3; outline: none; box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.2); }
     .two-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
     .required::after { content: " *"; color: #e74c3c; }
     button { background: linear-gradient(135deg, #0056b3 0%, #003a75 100%); color: white; border: none; padding: 16px; font-size: 18px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: 600; transition: all 0.3s; margin-top: 10px; letter-spacing: 1px; text-transform: uppercase; position: relative; }
-    button:hover:not(:disabled) { background: linear-gradient(135deg, #004494 0%, #002954 100%); transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+    button:hover:not(:disabled) { background: linear-gradient(135deg, #004494 0%, #002954 100%); transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); }
     button:active:not(:disabled) { transform: translateY(0); }
     button:disabled { background: linear-gradient(135deg, #6c757d 0%, #495057 100%); cursor: not-allowed; opacity: 0.8; }
     .message { padding: 15px; margin: 20px 0; border-radius: 8px; display: none; text-align: center; font-weight: 500; }
@@ -50,91 +50,97 @@
 
 <!-- ACCESO -->
 <div id="accessSection" class="access-section">
-    <div class="access-container">
-        <h2><i class="fas fa-lock"></i> Sistema de Registro LSAF</h2>
-        <p>Este formulario requiere un código de acceso válido</p>
-        <div class="access-input">
-            <input type="text" id="accessCode" placeholder="Ingresa el código de acceso">
-        </div>
-        <button id="checkBtn"><i class="fas fa-unlock"></i> Verificar Acceso</button>
-        <p id="accessError" style="color: #fff; background: rgba(200,0,0,0.5); padding: 10px; border-radius: 5px; display: none; margin-top: 15px;">
-            <i class="fas fa-exclamation-circle"></i> Código incorrecto o ya utilizado
-        </p>
+  <div class="access-container">
+    <h2><i class="fas fa-lock"></i> Sistema de Registro LSAF</h2>
+    <p>Este formulario requiere un código de acceso válido</p>
+    <div class="access-input">
+      <input type="text" id="accessCode" placeholder="Ingresa el código de acceso">
     </div>
+    <button id="checkBtn">
+      <i class="fas fa-unlock"></i> Verificar Acceso
+    </button>
+    <p id="accessError" style="color: #fff; background: rgba(200,0,0,0.5); padding:10px; border-radius:5px; display:none; margin-top:15px;">
+      <i class="fas fa-exclamation-circle"></i> Código incorrecto
+    </p>
+  </div>
 </div>
 
 <!-- ACCESO DENEGADO -->
 <div id="accessDenied" class="container hidden">
-    <div class="access-denied">
-        <i class="fas fa-ban"></i>
-        <h2>Acceso Denegado</h2>
-        <p>El código de acceso ya fue utilizado o no es válido.</p>
-        <p>Contacta con Plana Mayor para registrar un nuevo vehículo.</p>
-    </div>
+  <div class="access-denied">
+    <i class="fas fa-ban"></i>
+    <h2>Acceso Denegado</h2>
+    <p>El código de acceso ya fue utilizado o no es válido.</p>
+    <p>Contacta con Plana Mayor para registrar un nuevo vehículo.</p>
+  </div>
 </div>
 
 <!-- FORMULARIO -->
 <div id="formContent" class="container hidden">
-    <div class="header">
-        <div class="logo-container">
-            <img src="https://i.imgur.com/fHV1Qo1.png" alt="Logo LSAF" class="logo">
-        </div>
-        <div class="header-text">
-            <h1>REGISTRO VEHICULAR LSAF</h1>
-            <p>Sistema de Gestión Vehicular</p>
-        </div>
+  <div class="header">
+    <div class="logo-container">
+      <img src="https://i.imgur.com/fHV1Qo1.png" alt="Logo LSAF" class="logo">
     </div>
-
-    <div class="form-container">
-        <div class="info-box">
-            <i class="fas fa-info-circle"></i> Complete todos los campos obligatorios (*) para registrar el vehículo en el sistema.
-        </div>
-        <div id="message" class="message"></div>
-
-        <form id="vehicleForm">
-            <div class="form-section">
-                <div class="form-section-title"><i class="fas fa-user"></i> Información Personal</div>
-                <div class="form-group">
-                    <label for="nombre" class="required">Nombre y Apellido</label>
-                    <input type="text" id="nombre" name="nombre" required placeholder="Ej: David Toro">
-                </div>
-                <div class="two-columns">
-                    <div class="form-group">
-                        <label for="nuim" class="required">NUIM</label>
-                        <input type="text" id="nuim" name="nuim" required placeholder="Ej: #ABCD">
-                    </div>
-                    <div class="form-group">
-                        <label for="telefono" class="required">Número de Teléfono</label>
-                        <input type="tel" id="telefono" name="telefono" required placeholder="Ej: 123456">
-                    </div>
-                </div>
-            </div>
-            <div class="form-section">
-                <div class="form-section-title"><i class="fas fa-car"></i> Información del Vehículo</div>
-                <div class="two-columns">
-                    <div class="form-group">
-                        <label for="marca" class="required">Marca del Vehículo</label>
-                        <input type="text" id="marca" name="marca" required placeholder="Ej: Gallivanter">
-                    </div>
-                    <div class="form-group">
-                        <label for="modelo" class="required">Modelo del Vehículo</label>
-                        <input type="text" id="modelo" name="modelo" required placeholder="Ej: Baller LE">
-                    </div>
-                </div>
-                <div class="two-columns">
-                    <div class="form-group">
-                        <label for="color" class="required">Color del Vehículo</label>
-                        <input type="text" id="color" name="color" required placeholder="Ej: Negro">
-                    </div>
-                    <div class="form-group">
-                        <label for="matricula" class="required">Matrícula del Vehículo</label>
-                        <input type="text" id="matricula" name="matricula" required placeholder="Ej: ABC-1234">
-                    </div>
-                </div>
-            </div>
-            <button type="submit" id="submitBtn"><i class="fas fa-paper-plane"></i> Registrar Vehículo</button>
-        </form>
+    <div class="header-text">
+      <h1>REGISTRO VEHICULAR LSAF</h1>
+      <p>Sistema de Gestión Vehicular</p>
     </div>
+  </div>
+  <div class="form-container">
+    <div class="info-box">
+      <i class="fas fa-info-circle"></i> Complete todos los campos obligatorios (*) para registrar el vehículo en el sistema.
+    </div>
+    <div id="message" class="message"></div>
+    <form id="vehicleForm">
+      <div class="form-section">
+        <div class="form-section-title">
+          <i class="fas fa-user"></i> Información Personal
+        </div>
+        <div class="form-group">
+          <label for="nombre" class="required">Nombre y Apellido</label>
+          <input type="text" id="nombre" name="nombre" required placeholder="Ej: David Toro">
+        </div>
+        <div class="two-columns">
+          <div class="form-group">
+            <label for="nuim" class="required">NUIM</label>
+            <input type="text" id="nuim" name="nuim" required placeholder="Ej: #ABCD">
+          </div>
+          <div class="form-group">
+            <label for="telefono" class="required">Número de Teléfono</label>
+            <input type="tel" id="telefono" name="telefono" required placeholder="Ej: 123456">
+          </div>
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title">
+          <i class="fas fa-car"></i> Información del Vehículo
+        </div>
+        <div class="two-columns">
+          <div class="form-group">
+            <label for="marca" class="required">Marca del Vehículo</label>
+            <input type="text" id="marca" name="marca" required placeholder="Ej: Gallivanter">
+          </div>
+          <div class="form-group">
+            <label for="modelo" class="required">Modelo del Vehículo</label>
+            <input type="text" id="modelo" name="modelo" required placeholder="Ej: Baller LE">
+          </div>
+        </div>
+        <div class="two-columns">
+          <div class="form-group">
+            <label for="color" class="required">Color del Vehículo</label>
+            <input type="text" id="color" name="color" required placeholder="Ej: Negro">
+          </div>
+          <div class="form-group">
+            <label for="matricula" class="required">Matrícula del Vehículo</label>
+            <input type="text" id="matricula" name="matricula" required placeholder="Ej: ABC-1234">
+          </div>
+        </div>
+      </div>
+      <button type="submit" id="submitBtn">
+        <i class="fas fa-paper-plane"></i> Registrar Vehículo
+      </button>
+    </form>
+  </div>
 </div>
 
 <script>
@@ -149,60 +155,56 @@ const accessDenied = document.getElementById('accessDenied');
 const formContent = document.getElementById('formContent');
 const accessError = document.getElementById('accessError');
 const accessCodeInput = document.getElementById('accessCode');
+const checkBtn = document.getElementById('checkBtn');
 
 async function loadCurrentPassword() {
     try {
         const response = await fetch(`${SCRIPT_URL}?action=getPassword&t=${Date.now()}`);
         const data = await response.json();
-        if (data.password) {
-            ACTIVE_CODE = data.password;
-            console.log('Contraseña actual:', ACTIVE_CODE);
-        }
+        if(data.password) ACTIVE_CODE = data.password;
     } catch (error) {
-        console.error("Error obteniendo código:", error);
+        console.error('Error al cargar contraseña:', error);
     }
 }
 
 async function checkAccess() {
-    // Deshabilitar botón y mostrar spinner
-    const checkBtn = document.getElementById('checkBtn');
     checkBtn.disabled = true;
-    const originalText = checkBtn.innerHTML;
     checkBtn.innerHTML = '<span class="loading-spinner"></span> Verificando...';
 
     await loadCurrentPassword();
+
     let codeToCheck = accessCodeInput.value.trim();
-
-    if (!codeToCheck) {
+    if(!codeToCheck) {
         showError("Por favor ingresa un código");
-        checkBtn.disabled = false;
-        checkBtn.innerHTML = originalText;
+        resetCheckBtn();
         return;
     }
 
-    if (localStorage.getItem(USED_KEY) === ACTIVE_CODE) {
+    if(localStorage.getItem(USED_KEY) === ACTIVE_CODE) {
         showAccessDenied();
-        checkBtn.disabled = false;
-        checkBtn.innerHTML = originalText;
+        resetCheckBtn();
         return;
     }
 
-    if (codeToCheck === ACTIVE_CODE) {
+    if(codeToCheck === ACTIVE_CODE) {
         currentCode = codeToCheck;
         accessSection.classList.add('hidden');
         formContent.classList.remove('hidden');
-        // Una vez mostrado el formulario, el botón ya no es necesario
     } else {
         showError("Código incorrecto");
-        checkBtn.disabled = false;
-        checkBtn.innerHTML = originalText;
     }
+    resetCheckBtn();
+}
+
+function resetCheckBtn() {
+    checkBtn.disabled = false;
+    checkBtn.innerHTML = '<i class="fas fa-unlock"></i> Verificar Acceso';
 }
 
 function showError(msg) {
     accessError.textContent = "✗ " + msg;
     accessError.style.display = 'block';
-    setTimeout(() => { accessError.style.display = 'none'; }, 3000);
+    setTimeout(()=>{ accessError.style.display='none'; }, 3000);
 }
 
 function showAccessDenied() {
@@ -210,19 +212,19 @@ function showAccessDenied() {
     accessDenied.classList.remove('hidden');
 }
 
-accessCodeInput.addEventListener('keypress', e => { if (e.key === 'Enter') checkAccess(); });
+accessCodeInput.addEventListener('keypress', e => { if(e.key==='Enter') checkAccess(); });
+checkBtn.addEventListener('click', checkAccess);
 
-// =======================
-// FORM SUBMIT
-// =======================
+// === FORMULARIO ===
 const form = document.getElementById('vehicleForm');
 const submitBtn = document.getElementById('submitBtn');
 const messageDiv = document.getElementById('message');
 let isSubmitting = false;
 
-form.addEventListener('submit', e => {
+form.addEventListener('submit', function(e){
     e.preventDefault();
-    if (isSubmitting) return;
+    if(isSubmitting) return;
+
     isSubmitting = true;
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<span class="loading-spinner"></span> Procesando...';
@@ -247,85 +249,35 @@ form.addEventListener('submit', e => {
         headers: {'Content-Type':'application/json'},
         body: JSON.stringify(formData)
     })
-    .then(() => {
+    .then(()=> {
         messageDiv.textContent = "¡Vehículo registrado correctamente!";
         messageDiv.className = "message success";
         form.reset();
-        if (currentCode) localStorage.setItem(USED_KEY, currentCode);
-        setTimeout(() => {
+        if(currentCode) localStorage.setItem(USED_KEY, currentCode);
+
+        setTimeout(()=> {
             isSubmitting = false;
             submitBtn.disabled = false;
             submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Registrar Vehículo';
-        }, 2000);
+        },2000);
     })
-    .catch(err => {
+    .catch(error=>{
         messageDiv.textContent = "Error al enviar los datos, inténtalo de nuevo.";
         messageDiv.className = "message error";
-        console.error(err);
-        setTimeout(() => {
-            isSubmitting = false;
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Registrar Vehículo';
-        }, 2000);
+        console.error(error);
+        setTimeout(()=> {
+            isSubmitting=false;
+            submitBtn.disabled=false;
+            submitBtn.innerHTML='<i class="fas fa-paper-plane"></i> Registrar Vehículo';
+        },2000);
     });
 });
 
-// =======================
-// INIT
-// =======================
-window.onload = async function() {
+// Inicialización al cargar la página
+window.onload = async function(){
     await loadCurrentPassword();
-    if (localStorage.getItem(USED_KEY) === ACTIVE_CODE) showAccessDenied();
-};
-
-// =======================
-// PASSWORD UPDATE CHECK
-// =======================
-let lastCheck = 0;
-const CHECK_INTERVAL = 30000;
-
-async function checkForPasswordUpdate() {
-    const now = Date.now();
-    if (now - lastCheck < CHECK_INTERVAL) return;
-    lastCheck = now;
-    try {
-        const resp = await fetch(`${SCRIPT_URL}?action=getPassword&t=${now}`);
-        if (!resp.ok) return;
-        const data = await resp.json();
-        if (data.password && data.password !== ACTIVE_CODE) {
-            console.log('Contraseña actualizada:', data.password);
-            ACTIVE_CODE = data.password;
-            if (!formContent.classList.contains('hidden')) showTemporaryMessage('Se ha actualizado la contraseña del sistema', 'info');
-        }
-    } catch(e) { console.log('Error al verificar contraseña:', e); }
+    if(localStorage.getItem(USED_KEY) === ACTIVE_CODE) showAccessDenied();
 }
-
-function showTemporaryMessage(msg, type) {
-    const temp = document.createElement('div');
-    temp.textContent = msg;
-    temp.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 15px;
-        border-radius: 5px;
-        z-index: 1000;
-        font-weight: bold;
-        background-color: ${type==='info'? '#e8f4ff':'#d4edda'};
-        color: ${type==='info'? '#004085':'#155724'};
-        border: 1px solid ${type==='info'? '#b8daff':'#c3e6cb'};
-    `;
-    document.body.appendChild(temp);
-    setTimeout(() => { if (document.body.contains(temp)) document.body.removeChild(temp); }, 5000);
-}
-
-setInterval(checkForPasswordUpdate, CHECK_INTERVAL);
-setTimeout(checkForPasswordUpdate, 5000);
-
-document.getElementById('checkBtn').addEventListener('click', checkAccess);
-
 </script>
 </body>
 </html>
-
-
