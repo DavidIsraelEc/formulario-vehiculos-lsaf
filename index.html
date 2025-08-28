@@ -172,12 +172,15 @@ function loadCurrentPassword() {
         window[callbackName] = function(data) {
             // Limpiar después de recibir la respuesta
             delete window[callbackName];
-            document.getElementById('jsonpScript').remove();
+            const scriptElement = document.getElementById('jsonpScript');
+            if (scriptElement) {
+                scriptElement.remove();
+            }
             
             if (data && data.password) {
                 resolve(data.password);
             } else {
-                reject(new Error('No se pudo obtener la contraseña'));
+                reject(new Error('No se pudo obtener la contraseña desde el servidor'));
             }
         };
         
@@ -188,7 +191,7 @@ function loadCurrentPassword() {
         
         script.onerror = function() {
             delete window[callbackName];
-            reject(new Error('Error al cargar la contraseña'));
+            reject(new Error('Error de conexión al servidor. Verifica tu conexión a internet.'));
         };
         
         // Agregar el script al documento
@@ -198,9 +201,9 @@ function loadCurrentPassword() {
         setTimeout(() => {
             if (window[callbackName]) {
                 delete window[callbackName];
-                reject(new Error('Timeout al cargar la contraseña'));
+                reject(new Error('El servidor no respondió a tiempo. Intenta nuevamente.'));
             }
-        }, 10000);
+        }, 15000);
     });
 }
 
@@ -208,6 +211,7 @@ function loadCurrentPassword() {
 async function checkAccess() {
     checkBtn.disabled = true;
     checkBtn.innerHTML = '<span class="loading-spinner"></span> Verificando...';
+    debugInfo.style.display = 'none';
 
     try {
         // Cargar la contraseña actual
@@ -235,8 +239,8 @@ async function checkAccess() {
         }
     } catch (error) {
         console.error('Error en checkAccess:', error);
-        showError("Error al verificar el código. Intenta nuevamente.");
-        debugInfo.textContent = "Error: " + error.message;
+        showError(error.message);
+        debugInfo.textContent = "Detalles del error: " + error.message;
         debugInfo.style.display = "block";
     } finally {
         resetCheckBtn();
@@ -283,7 +287,10 @@ function submitFormWithJsonp(formData) {
         window[callbackName] = function(data) {
             // Limpiar después de recibir la respuesta
             delete window[callbackName];
-            document.getElementById('formJsonpScript').remove();
+            const scriptElement = document.getElementById('formJsonpScript');
+            if (scriptElement) {
+                scriptElement.remove();
+            }
             
             if (data && data.result === "success") {
                 resolve(data);
@@ -305,7 +312,7 @@ function submitFormWithJsonp(formData) {
         
         script.onerror = function() {
             delete window[callbackName];
-            reject(new Error('Error al enviar el formulario'));
+            reject(new Error('Error de conexión al enviar el formulario'));
         };
         
         // Agregar el script al documento
@@ -317,7 +324,7 @@ function submitFormWithJsonp(formData) {
                 delete window[callbackName];
                 reject(new Error('Timeout al enviar el formulario'));
             }
-        }, 10000);
+        }, 15000);
     });
 }
 
@@ -329,6 +336,7 @@ form.addEventListener('submit', async function(e) {
     isSubmitting = true;
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<span class="loading-spinner"></span> Procesando...';
+    debugInfo.style.display = 'none';
 
     const formData = {
         nombre: document.getElementById('nombre').value,
@@ -356,7 +364,7 @@ form.addEventListener('submit', async function(e) {
         console.error('Error al enviar formulario:', error);
         messageDiv.textContent = "Error al enviar los datos. Por favor, inténtalo de nuevo.";
         messageDiv.className = "message error";
-        debugInfo.textContent = "Error: " + error.message;
+        debugInfo.textContent = "Detalles del error: " + error.message;
         debugInfo.style.display = "block";
     } finally {
         setTimeout(() => {
@@ -368,24 +376,12 @@ form.addEventListener('submit', async function(e) {
 });
 
 // Inicialización al cargar la página
-window.onload = async function() {
-    try {
-        // No cargamos la contraseña automáticamente al inicio para evitar problemas
-        // Solo verificamos si ya se usó un código previamente
-        if(localStorage.getItem(USED_KEY)) {
-            // Intentamos cargar la contraseña actual para comparar
-            try {
-                ACTIVE_CODE = await loadCurrentPassword();
-                if(localStorage.getItem(USED_KEY) === ACTIVE_CODE) {
-                    showAccessDenied();
-                }
-            } catch (error) {
-                // Si falla la carga de la contraseña, no mostramos acceso denegado
-                console.error('Error al verificar código usado:', error);
-            }
-        }
-    } catch (error) {
-        console.error('Error al inicializar:', error);
+window.onload = function() {
+    // Solo verificamos si ya se usó un código previamente
+    const usedCode = localStorage.getItem(USED_KEY);
+    if (usedCode) {
+        // Mostramos acceso denegado solo si hay un código usado
+        showAccessDenied();
     }
 };
 </script>
