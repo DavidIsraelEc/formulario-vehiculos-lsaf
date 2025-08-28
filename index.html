@@ -144,6 +144,7 @@
 </div>
 
 <script>
+// URL del Google Apps Script - Reemplaza con tu URL
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwuZVRDOgShaXoDpfNKEG6UvO9FQ_Uh0ULlV9XOvntESC_hR0Xslz-yadDb-CkRolR_/exec';
 const USED_KEY = "used_code";
 
@@ -157,9 +158,17 @@ const accessError = document.getElementById('accessError');
 const accessCodeInput = document.getElementById('accessCode');
 const checkBtn = document.getElementById('checkBtn');
 
+// Función para hacer solicitudes CORS a través de un proxy
+async function makeRequest(url, options = {}) {
+  // Usamos un proxy para evitar problemas CORS
+  const proxyUrl = 'https://corsproxy.io/?';
+  const response = await fetch(proxyUrl + encodeURIComponent(url), options);
+  return response;
+}
+
 async function loadCurrentPassword() {
     try {
-        const response = await fetch(`${SCRIPT_URL}?action=getPassword&t=${Date.now()}`);
+        const response = await makeRequest(`${SCRIPT_URL}?action=getPassword&t=${Date.now()}`);
         const data = await response.json();
         if(data.password) ACTIVE_CODE = data.password;
     } catch (error) {
@@ -221,7 +230,7 @@ const submitBtn = document.getElementById('submitBtn');
 const messageDiv = document.getElementById('message');
 let isSubmitting = false;
 
-form.addEventListener('submit', function(e){
+form.addEventListener('submit', async function(e){
     e.preventDefault();
     if(isSubmitting) return;
 
@@ -237,41 +246,44 @@ form.addEventListener('submit', function(e){
         modelo: document.getElementById('modelo').value,
         color: document.getElementById('color').value,
         matricula: document.getElementById('matricula').value,
-        action: "registrarVehiculo" // Añadimos acción específica
+        action: "registrarVehiculo"
     };
 
     messageDiv.textContent = "Enviando datos al sistema...";
     messageDiv.className = "message";
     messageDiv.style.display = "block";
 
-    fetch(SCRIPT_URL, {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify(formData)
-    })
-    .then(response => response.json())
-    .then(data => {
+    try {
+        // Usamos el proxy para evitar problemas CORS
+        const response = await makeRequest(SCRIPT_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        });
+        
+        const data = await response.json();
+        
         if(data.result === "success") {
             messageDiv.textContent = "¡Vehículo registrado correctamente!";
             messageDiv.className = "message success";
             form.reset();
             if(currentCode) localStorage.setItem(USED_KEY, currentCode);
         } else {
-            throw new Error(data.error);
+            throw new Error(data.error || "Error desconocido");
         }
-    })
-    .catch(error => {
-        messageDiv.textContent = "Error al enviar los datos, inténtalo de nuevo.";
+    } catch(error) {
+        console.error("Error:", error);
+        messageDiv.textContent = "Error al enviar los datos. Por favor, inténtalo de nuevo.";
         messageDiv.className = "message error";
-        console.error(error);
-    })
-    .finally(() => {
+    } finally {
         setTimeout(()=> {
             isSubmitting = false;
             submitBtn.disabled = false;
             submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Registrar Vehículo';
         }, 2000);
-    });
+    }
 });
 
 // Inicialización al cargar la página
