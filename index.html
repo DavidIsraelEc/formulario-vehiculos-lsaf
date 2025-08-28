@@ -162,14 +162,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
    async function fetchCurrentCode() {
     try {
-        const res = await fetch(CURRENT_CODE_URL);
-        const json = await res.json(); // JSON puro
+        const res = await fetch(CURRENT_CODE_URL); // URL sin ?callback
+        const json = await res.json(); // ahora sí es JSON
         return json.currentCode;
     } catch (err) {
         console.error("Error obteniendo código:", err);
         return null;
     }
 }
+
 
 
     async function checkPassword() {
@@ -237,6 +238,7 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 </body>
 </html>
+
 
 
 
