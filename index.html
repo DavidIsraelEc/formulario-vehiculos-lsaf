@@ -65,58 +65,47 @@
   </div>
 
   <script>
-    const SHEET_URL = "https://script.google.com/macros/s/AKfycbwuZVRDOgShaXoDpfNKEG6UvO9FQ_Uh0ULlV9XOvntESC_hR0Xslz-yadDb-CkRolR_/exec";
-    let ACTIVE_CODE = null;
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbwuZVRDOgShaXoDpfNKEG6UvO9FQ_Uh0ULlV9XOvntESC_hR0Xslz-yadDb-CkRolR_/exec";
+let ACTIVE_CODE = null;
 
-    // Cargar contraseña desde Apps Script
-    async function loadCurrentPassword() {
+// Cargar contraseña desde Apps Script
+async function loadCurrentPassword() {
   try {
-    const response = await fetch(
-      "https://script.google.com/macros/s/AKfycbwuZVRDOgShaXoDpfNKEG6UvO9FQ_Uh0ULlV9XOvntESC_hR0Xslz-yadDb-CkRolR_/exec?noCache=" + new Date().getTime()
-    );
+    const response = await fetch(SHEET_URL + "?noCache=" + new Date().getTime());
     const data = await response.json();
-    console.log("Respuesta Apps Script:", data);
-    currentPassword = data.code;
+    console.log("Contraseña cargada desde Apps Script:", data);
+    ACTIVE_CODE = data.password; // Asegúrate que en Apps Script devuelva { "password": "xxx" }
   } catch (error) {
     console.error("Error obteniendo código:", error);
   }
 }
 
+// Verificar contraseña
+function checkPassword() {
+  const inputPass = document.getElementById("passwordInput").value.trim();
+  const errorEl = document.getElementById("accessError");
+  errorEl.style.display = "none";
 
-    // Verificar contraseña
-    async function loadCurrentPassword() {
-  try {
-    const response = await fetch(
-      "https://script.google.com/macros/s/TU_SCRIPT_ID/exec?noCache=" + new Date().getTime()
-    );
-    const data = await response.json();
-    console.log("Contraseña cargada:", data.code);
-    ACTIVE_CODE = data.code;
-  } catch (error) {
-    console.error("Error obteniendo código:", error);
+  console.log("Contraseña ingresada:", inputPass);
+  console.log("Código actual recibido:", ACTIVE_CODE);
+
+  if (inputPass === ACTIVE_CODE) {
+    document.getElementById("accessSection").classList.add("hidden");
+    document.getElementById("formContent").classList.remove("hidden");
+  } else {
+    errorEl.textContent = "❌ Contraseña incorrecta";
+    errorEl.style.display = "block";
   }
 }
 
-
-      console.log("Contraseña ingresada:", inputPass);
-      console.log("Código actual recibido:", ACTIVE_CODE);
-
-      if (inputPass === ACTIVE_CODE) {
-        document.getElementById("accessSection").classList.add("hidden");
-        document.getElementById("formContent").classList.remove("hidden");
-      } else {
-        errorEl.textContent = "❌ Contraseña incorrecta";
-        errorEl.style.display = "block";
-      }
-    }
-
-    // Inicializar
-    document.addEventListener("DOMContentLoaded", () => {
-      loadCurrentPassword();
-      document.getElementById("checkBtn").addEventListener("click", checkPassword);
-    });
-  </script>
+// Inicializar
+document.addEventListener("DOMContentLoaded", () => {
+  loadCurrentPassword();
+  document.getElementById("checkBtn").addEventListener("click", checkPassword);
+});
+</script>
 </body>
 </html>
+
 
 
