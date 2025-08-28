@@ -409,26 +409,18 @@ const checkBtn = document.getElementById('checkBtn');
 const debugInfo = document.getElementById('debugInfo');
 
 // Función para cargar la contraseña usando JSONP
+// Ejemplo de función modificada para usar un proxy
 function loadCurrentPassword() {
     return new Promise((resolve, reject) => {
-        // Crear un nombre único para la función de callback
-        const callbackName = 'passwordCallback_' + Date.now();
-        
-        // Definir la función de callback global
-        window[callbackName] = function(data) {
-            // Limpiar después de recibir la respuesta
-            delete window[callbackName];
-            const scriptElement = document.getElementById('jsonpScript');
-            if (scriptElement) {
-                scriptElement.remove();
-            }
-            
-            if (data && data.password) {
-                resolve(data.password);
-            } else {
-                reject(new Error('No se pudo obtener la contraseña desde el servidor'));
-            }
-        };
+        const proxyUrl = 'https://cors-anywhere.herokuapp.com/'; // Proxy público (usa uno propio para producción)
+        const targetUrl = `${SCRIPT_URL}?action=getPassword&t=${Date.now()}`;
+
+        fetch(proxyUrl + targetUrl)
+            .then(response => response.json())
+            .then(data => resolve(data.password))
+            .catch(error => reject(new Error('Error de conexión: ' + error.message)));
+    });
+}
         
         // Crear el script para JSONP
         const script = document.createElement('script');
@@ -642,3 +634,4 @@ window.onload = async function() {
 </script>
 </body>
 </html>
+
