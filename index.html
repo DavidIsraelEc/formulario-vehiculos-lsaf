@@ -151,15 +151,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const submitBtn = document.getElementById("submitBtn");
 
     async function fetchCurrentCode() {
-        try {
-            const res = await fetch(CURRENT_CODE_URL);
-            const json = await res.json();  // JSON limpio desde Apps Script
-            return json.currentCode;
-        } catch (err) {
-            console.error("Error obteniendo código:", err);
-            return null;
-        }
+    try {
+        const res = await fetch(CURRENT_CODE_URL);
+        const json = await res.json();
+        return json.currentCode;
+    } catch (err) {
+        console.error("Error obteniendo código:", err);
+        return null;
     }
+}
+
 
     async function checkPassword() {
         const entered = passwordInput.value.trim();
@@ -225,6 +226,7 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 </body>
 </html>
+
 
 
 
