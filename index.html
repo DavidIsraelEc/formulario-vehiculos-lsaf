@@ -162,20 +162,17 @@ document.addEventListener("DOMContentLoaded", () => {
 }
 
 
-    async function checkPassword() {
-        const entered = passwordInput.value.trim();
-        const currentCode = await fetchCurrentCode();
-        console.log("Contraseña ingresada:", entered);
-        console.log("Código actual recibido:", currentCode);
-
-        if (entered === currentCode) {
-            accessSection.classList.add("hidden");
-            formContent.classList.remove("hidden");
-        } else {
-            accessError.classList.remove("hidden");
-            setTimeout(() => accessError.classList.add("hidden"), 3000);
-        }
+    async function fetchCurrentCode() {
+    try {
+        const res = await fetch(CURRENT_CODE_URL);
+        const json = await res.json();
+        return json.currentCode;
+    } catch (err) {
+        console.error("Error obteniendo código:", err);
+        return null;
     }
+}
+
 
     async function submitForm(e) {
         e.preventDefault();
@@ -226,6 +223,7 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 </body>
 </html>
+
 
 
 
