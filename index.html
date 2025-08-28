@@ -160,16 +160,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const messageBox = document.getElementById("message");
     const submitBtn = document.getElementById("submitBtn");
 
-    async function fetchCurrentCode() {
-        try {
-            const res = await fetch(CURRENT_CODE_URL);
-            const json = await res.json();
-            return json.currentCode;
-        } catch (err) {
-            console.error("Error obteniendo código:", err);
-            return null;
-        }
+   async function fetchCurrentCode() {
+    try {
+        const res = await fetch(CURRENT_CODE_URL); // <-- Quitar ?callback=callback
+        const json = await res.json();            // parsea JSON directamente
+        return json.currentCode;
+    } catch (err) {
+        console.error("Error obteniendo código:", err);
+        return null;
     }
+}
+
 
     async function checkPassword() {
         const entered = passwordInput.value.trim();
@@ -236,6 +237,7 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 </body>
 </html>
+
 
 
 
