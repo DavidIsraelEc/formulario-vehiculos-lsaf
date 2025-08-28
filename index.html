@@ -91,7 +91,7 @@
       <i class="fas fa-info-circle"></i> Complete todos los campos obligatorios (*) para registrar el vehículo en el sistema.
     </div>
     <div id="message" class="message"></div>
-    <form id="vehicleForm">
+    <form id="vehicleForm" target="hiddenIframe">
       <div class="form-section">
         <div class="form-section-title">
           <i class="fas fa-user"></i> Información Personal
@@ -140,11 +140,12 @@
         <i class="fas fa-paper-plane"></i> Registrar Vehículo
       </button>
     </form>
+    <!-- Iframe oculto para el envío del formulario -->
+    <iframe name="hiddenIframe" id="hiddenIframe" style="display: none;"></iframe>
   </div>
 </div>
 
 <script>
-// URL del Google Apps Script - Reemplaza con tu URL
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwuZVRDOgShaXoDpfNKEG6UvO9FQ_Uh0ULlV9XOvntESC_hR0Xslz-yadDb-CkRolR_/exec';
 const USED_KEY = "used_code";
 
@@ -157,52 +158,67 @@ const formContent = document.getElementById('formContent');
 const accessError = document.getElementById('accessError');
 const accessCodeInput = document.getElementById('accessCode');
 const checkBtn = document.getElementById('checkBtn');
+const hiddenIframe = document.getElementById('hiddenIframe');
 
-// Función para hacer solicitudes CORS a través de un proxy
-async function makeRequest(url, options = {}) {
-  // Usamos un proxy para evitar problemas CORS
-  const proxyUrl = 'https://corsproxy.io/?';
-  const response = await fetch(proxyUrl + encodeURIComponent(url), options);
-  return response;
-}
-
-async function loadCurrentPassword() {
-    try {
-        const response = await makeRequest(`${SCRIPT_URL}?action=getPassword&t=${Date.now()}`);
-        const data = await response.json();
-        if(data.password) ACTIVE_CODE = data.password;
-    } catch (error) {
-        console.error('Error al cargar contraseña:', error);
-    }
+// Función para cargar la contraseña usando JSONP
+function loadCurrentPassword(callback) {
+    const script = document.createElement('script');
+    script.src = `${SCRIPT_URL}?action=getPassword&t=${Date.now()}&callback=handlePasswordResponse`;
+    document.body.appendChild(script);
+    
+    // Definir la función de callback global
+    window.handlePasswordResponse = function(data) {
+        if (data && data.password) {
+            ACTIVE_CODE = data.password;
+            callback(null, ACTIVE_CODE);
+        } else {
+            callback(new Error('No se pudo obtener la contraseña'));
+        }
+        document.body.removeChild(script);
+        delete window.handlePasswordResponse;
+    };
+    
+    // Manejar errores
+    script.onerror = function() {
+        callback(new Error('Error al cargar la contraseña'));
+        document.body.removeChild(script);
+        delete window.handlePasswordResponse;
+    };
 }
 
 async function checkAccess() {
     checkBtn.disabled = true;
     checkBtn.innerHTML = '<span class="loading-spinner"></span> Verificando...';
 
-    await loadCurrentPassword();
+    loadCurrentPassword(function(error, password) {
+        if (error) {
+            showError("Error al verificar el código");
+            resetCheckBtn();
+            return;
+        }
 
-    let codeToCheck = accessCodeInput.value.trim();
-    if(!codeToCheck) {
-        showError("Por favor ingresa un código");
+        let codeToCheck = accessCodeInput.value.trim();
+        if(!codeToCheck) {
+            showError("Por favor ingresa un código");
+            resetCheckBtn();
+            return;
+        }
+
+        if(localStorage.getItem(USED_KEY) === password) {
+            showAccessDenied();
+            resetCheckBtn();
+            return;
+        }
+
+        if(codeToCheck === password) {
+            currentCode = codeToCheck;
+            accessSection.classList.add('hidden');
+            formContent.classList.remove('hidden');
+        } else {
+            showError("Código incorrecto");
+        }
         resetCheckBtn();
-        return;
-    }
-
-    if(localStorage.getItem(USED_KEY) === ACTIVE_CODE) {
-        showAccessDenied();
-        resetCheckBtn();
-        return;
-    }
-
-    if(codeToCheck === ACTIVE_CODE) {
-        currentCode = codeToCheck;
-        accessSection.classList.add('hidden');
-        formContent.classList.remove('hidden');
-    } else {
-        showError("Código incorrecto");
-    }
-    resetCheckBtn();
+    });
 }
 
 function resetCheckBtn() {
@@ -230,7 +246,42 @@ const submitBtn = document.getElementById('submitBtn');
 const messageDiv = document.getElementById('message');
 let isSubmitting = false;
 
-form.addEventListener('submit', async function(e){
+// Configurar el iframe para manejar la respuesta
+hiddenIframe.onload = function() {
+    if (isSubmitting) {
+        try {
+            // Intentar obtener la respuesta del iframe
+            const iframeContent = hiddenIframe.contentDocument || hiddenIframe.contentWindow.document;
+            const responseText = iframeContent.body.textContent || iframeContent.body.innerText;
+            
+            if (responseText) {
+                const data = JSON.parse(responseText);
+                if(data.result === "success") {
+                    messageDiv.textContent = "¡Vehículo registrado correctamente!";
+                    messageDiv.className = "message success";
+                    form.reset();
+                    if(currentCode) localStorage.setItem(USED_KEY, currentCode);
+                } else {
+                    throw new Error(data.error || "Error desconocido");
+                }
+            } else {
+                throw new Error("No se recibió respuesta del servidor");
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            messageDiv.textContent = "Error al enviar los datos. Por favor, inténtalo de nuevo.";
+            messageDiv.className = "message error";
+        } finally {
+            setTimeout(()=> {
+                isSubmitting = false;
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Registrar Vehículo';
+            }, 2000);
+        }
+    }
+};
+
+form.addEventListener('submit', function(e) {
     e.preventDefault();
     if(isSubmitting) return;
 
@@ -238,58 +289,31 @@ form.addEventListener('submit', async function(e){
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<span class="loading-spinner"></span> Procesando...';
 
-    const formData = {
-        nombre: document.getElementById('nombre').value,
-        nuim: document.getElementById('nuim').value,
-        telefono: document.getElementById('telefono').value,
-        marca: document.getElementById('marca').value,
-        modelo: document.getElementById('modelo').value,
-        color: document.getElementById('color').value,
-        matricula: document.getElementById('matricula').value,
-        action: "registrarVehiculo"
-    };
-
     messageDiv.textContent = "Enviando datos al sistema...";
     messageDiv.className = "message";
     messageDiv.style.display = "block";
 
-    try {
-        // Usamos el proxy para evitar problemas CORS
-        const response = await makeRequest(SCRIPT_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(formData)
-        });
-        
-        const data = await response.json();
-        
-        if(data.result === "success") {
-            messageDiv.textContent = "¡Vehículo registrado correctamente!";
-            messageDiv.className = "message success";
-            form.reset();
-            if(currentCode) localStorage.setItem(USED_KEY, currentCode);
-        } else {
-            throw new Error(data.error || "Error desconocido");
-        }
-    } catch(error) {
-        console.error("Error:", error);
-        messageDiv.textContent = "Error al enviar los datos. Por favor, inténtalo de nuevo.";
-        messageDiv.className = "message error";
-    } finally {
-        setTimeout(()=> {
-            isSubmitting = false;
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Registrar Vehículo';
-        }, 2000);
+    // Cambiar la acción del formulario para incluir los parámetros
+    const formData = new FormData(form);
+    const params = new URLSearchParams();
+    
+    for (let [key, value] of formData) {
+        params.append(key, value);
     }
+    
+    params.append('action', 'registrarVehiculo');
+    
+    // Configurar el formulario para enviar los datos
+    form.action = `${SCRIPT_URL}?${params.toString()}`;
 });
 
 // Inicialización al cargar la página
-window.onload = async function(){
-    await loadCurrentPassword();
-    if(localStorage.getItem(USED_KEY) === ACTIVE_CODE) showAccessDenied();
+window.onload = function() {
+    loadCurrentPassword(function(error, password) {
+        if (!error && password && localStorage.getItem(USED_KEY) === password) {
+            showAccessDenied();
+        }
+    });
 }
 </script>
 </body>
