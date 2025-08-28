@@ -390,58 +390,204 @@
     </form>
   </div>
 </div>
-
 <script>
 // URL del Google Apps Script
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwuZVRDOgShaXoDpfNKEG6UvO9FQ_Uh0ULlV9XOvntESC_hR0Xslz-yadDb-CkRolR_/exec";
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwuZVRDOgShaXoDpfNKEG6UvO9FQ_Uh0ULlV9XOvntESC_hR0Xslz-yadDb-CkRolR_/exec';
+const USED_KEY = "used_code";
 
-const form = document.getElementById("vehicleForm");
-const messageDiv = document.getElementById("message");
-const submitBtn = document.getElementById("submitBtn");
+let ACTIVE_CODE = null;
+let currentCode = null;
 
-form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    submitBtn.disabled = true;
-    messageDiv.style.display = "block";
-    messageDiv.textContent = "Enviando datos...";
-    messageDiv.className = "message";
+const accessSection = document.getElementById('accessSection');
+const accessDenied = document.getElementById('accessDenied');
+const formContent = document.getElementById('formContent');
+const accessError = document.getElementById('accessError');
+const errorMessage = document.getElementById('errorMessage');
+const accessCodeInput = document.getElementById('accessCode');
+const checkBtn = document.getElementById('checkBtn');
+const debugInfo = document.getElementById('debugInfo');
 
-    const formData = {
-        nombre: document.getElementById("nombre").value,
-        nuim: document.getElementById("nuim").value,
-        telefono: document.getElementById("telefono").value,
-        marca: document.getElementById("marca").value,
-        modelo: document.getElementById("modelo").value,
-        color: document.getElementById("color").value,
-        matricula: document.getElementById("matricula").value,
-        action: "registrarVehiculo"
-    };
+// === FUNCIONES DE ACCESO ===
+function loadCurrentPassword() {
+    return new Promise((resolve, reject) => {
+        const callbackName = 'passwordCallback_' + Date.now();
+        window[callbackName] = function(data) {
+            delete window[callbackName];
+            const scriptElement = document.getElementById('jsonpScript');
+            if (scriptElement) scriptElement.remove();
+            if (data && data.password) {
+                resolve(data.password);
+            } else {
+                reject(new Error('No se pudo obtener la contraseña desde el servidor'));
+            }
+        };
+        const script = document.createElement('script');
+        script.id = 'jsonpScript';
+        script.src = `${SCRIPT_URL}?action=getPassword&callback=${callbackName}&t=${Date.now()}`;
+        script.onerror = function() {
+            delete window[callbackName];
+            reject(new Error('Error de conexión al servidor. Verifica tu conexión a internet.'));
+        };
+        document.head.appendChild(script);
+        setTimeout(() => {
+            if (window[callbackName]) {
+                delete window[callbackName];
+                reject(new Error('El servidor no respondió a tiempo. Intenta nuevamente.'));
+            }
+        }, 15000);
+    });
+}
 
+async function checkAccess() {
+    checkBtn.disabled = true;
+    checkBtn.innerHTML = '<span class="loading-spinner"></span> Verificando...';
+    debugInfo.style.display = 'none';
     try {
-        const response = await fetch(SCRIPT_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: new URLSearchParams(formData)
-        });
-        const result = await response.json();
-
-        if (result.result === "success") {
-            messageDiv.textContent = "✅ Vehículo registrado correctamente.";
-            messageDiv.className = "message success";
-            form.reset();
-        } else {
-            throw new Error(result.error || "Error desconocido");
+        ACTIVE_CODE = await loadCurrentPassword();
+        let codeToCheck = accessCodeInput.value.trim();
+        if (!codeToCheck) {
+            showError("Por favor ingresa un código");
+            resetCheckBtn();
+            return;
         }
-    } catch (err) {
-        console.error(err);
-        messageDiv.textContent = "❌ Error al registrar: " + err.message;
-        messageDiv.className = "message error";
+        if (codeToCheck === ACTIVE_CODE) {
+            const usedCode = localStorage.getItem(USED_KEY);
+            if (usedCode === ACTIVE_CODE) {
+                showAccessDenied();
+                resetCheckBtn();
+                return;
+            }
+            currentCode = codeToCheck;
+            accessSection.classList.add('hidden');
+            formContent.classList.remove('hidden');
+        } else {
+            showError("Código incorrecto");
+        }
+    } catch (error) {
+        console.error('Error en checkAccess:', error);
+        showError(error.message);
+        debugInfo.textContent = "Detalles del error: " + error.message;
+        debugInfo.style.display = "block";
     } finally {
-        submitBtn.disabled = false;
+        resetCheckBtn();
+    }
+}
+
+function resetCheckBtn() {
+    checkBtn.disabled = false;
+    checkBtn.innerHTML = '<i class="fas fa-unlock"></i> Verificar Acceso';
+}
+
+function showError(msg) {
+    errorMessage.textContent = msg;
+    accessError.style.display = 'block';
+    setTimeout(() => { accessError.style.display = 'none'; }, 5000);
+}
+
+function showAccessDenied() {
+    accessSection.classList.add('hidden');
+    accessDenied.classList.remove('hidden');
+}
+
+accessCodeInput.addEventListener('keypress', e => { if (e.key === 'Enter') checkAccess(); });
+checkBtn.addEventListener('click', checkAccess);
+
+// === FORMULARIO ===
+const form = document.getElementById('vehicleForm');
+const submitBtn = document.getElementById('submitBtn');
+const messageDiv = document.getElementById('message');
+let isSubmitting = false;
+
+function submitFormWithJsonp(formData) {
+    return new Promise((resolve, reject) => {
+        const callbackName = 'formCallback_' + Date.now();
+        window[callbackName] = function(data) {
+            delete window[callbackName];
+            const scriptElement = document.getElementById('formJsonpScript');
+            if (scriptElement) scriptElement.remove();
+            if (data && data.result === "success") {
+                resolve(data);
+            } else {
+                reject(new Error(data.error || 'Error al enviar el formulario'));
+            }
+        };
+        let params = `action=registrarVehiculo&callback=${callbackName}`;
+        for (const key in formData) {
+            params += `&${encodeURIComponent(key)}=${encodeURIComponent(formData[key])}`;
+        }
+        const script = document.createElement('script');
+        script.id = 'formJsonpScript';
+        script.src = `${SCRIPT_URL}?${params}`;
+        script.onerror = function() {
+            delete window[callbackName];
+            reject(new Error('Error de conexión al enviar el formulario'));
+        };
+        document.head.appendChild(script);
+        setTimeout(() => {
+            if (window[callbackName]) {
+                delete window[callbackName];
+                reject(new Error('Timeout al enviar el formulario'));
+            }
+        }, 15000);
+    });
+}
+
+form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    if (isSubmitting) return;
+    isSubmitting = true;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="loading-spinner"></span> Procesando...';
+    debugInfo.style.display = 'none';
+    const formData = {
+        nombre: document.getElementById('nombre').value,
+        nuim: document.getElementById('nuim').value,
+        telefono: document.getElementById('telefono').value,
+        marca: document.getElementById('marca').value,
+        modelo: document.getElementById('modelo').value,
+        color: document.getElementById('color').value,
+        matricula: document.getElementById('matricula').value
+    };
+    messageDiv.textContent = "Enviando datos al sistema...";
+    messageDiv.className = "message";
+    messageDiv.style.display = "block";
+    try {
+        await submitFormWithJsonp(formData);
+        messageDiv.textContent = "¡Vehículo registrado correctamente!";
+        messageDiv.className = "message success";
+        form.reset();
+        if (currentCode) localStorage.setItem(USED_KEY, currentCode);
+    } catch (error) {
+        console.error('Error al enviar formulario:', error);
+        messageDiv.textContent = "Error al enviar los datos. Por favor, inténtalo de nuevo.";
+        messageDiv.className = "message error";
+        debugInfo.textContent = "Detalles del error: " + error.message;
+        debugInfo.style.display = "block";
+    } finally {
+        setTimeout(() => {
+            isSubmitting = false;
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Registrar Vehículo';
+        }, 2000);
     }
 });
+
+// Inicialización
+window.onload = async function() {
+    try {
+        ACTIVE_CODE = await loadCurrentPassword();
+        const usedCode = localStorage.getItem(USED_KEY);
+        if (usedCode && usedCode === ACTIVE_CODE) {
+            showAccessDenied();
+        }
+    } catch (error) {
+        console.error('Error al verificar código usado:', error);
+    }
+};
 </script>
+
 </body>
 </html>
+
 
 
