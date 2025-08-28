@@ -197,7 +197,7 @@
             <div class="password-display">
                 <p>Tu código de acceso generado:</p>
                 <div id="password" class="password">LSAF0000</div>
-                <p>Este código se actualizará en la hoja CODIGOS (celda A2) después de guardarlo.</p>
+                <p>Pulsa Generar Nuevo Código luego pulsa en Validad y por ultimo proporciona el codigo a quien desee hacer su Registro Vehicular.</p>
             </div>
             
             <div class="btn-container">
@@ -208,7 +208,7 @@
                     <i class="fas fa-copy"></i> Copiar al Portapapeles
                 </button>
                 <button id="saveBtn" class="save">
-                    <i class="fas fa-save"></i> Guardar en Hoja
+                    <i class="fas fa-save"></i> Validar Código
                 </button>
             </div>
             
@@ -259,10 +259,10 @@
         // Manejar la respuesta del guardado
         function handleSaveResponse(data) {
             saveBtn.disabled = false;
-            saveBtn.innerHTML = '<i class="fas fa-save"></i> Guardar en Hoja';
+            saveBtn.innerHTML = '<i class="fas fa-save"></i> Código validado correctamente';
             
             if (data && data.result === "success") {
-                showMessage('¡Código guardado correctamente en la hoja CODIGOS (A2)!', 'success');
+                showMessage('¡Código Validado!', 'success');
             } else {
                 showMessage('Error: ' + (data && data.message ? data.message : 'Error desconocido'), 'error');
             }
