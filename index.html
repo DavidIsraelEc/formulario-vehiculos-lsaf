@@ -58,7 +58,7 @@
         <button id="checkBtn">
             <i class="fas fa-unlock"></i> Verificar Acceso
         </button>
-        <p id="accessError" style="color: #fff; background: rgba(200,0,0,0.5); padding:10px; border-radius:5px; display:none; margin-top:15px;">
+        <p id="accessError" style="color: #fff; background: rgba(200, 0, 0, 0.5); padding: 10px; border-radius: 5px; display: none; margin-top: 15px;">
             <i class="fas fa-exclamation-circle"></i> Código incorrecto o ya utilizado
         </p>
     </div>
@@ -160,18 +160,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const messageBox = document.getElementById("message");
     const submitBtn = document.getElementById("submitBtn");
 
-   async function fetchCurrentCode() {
-    try {
-        const res = await fetch(CURRENT_CODE_URL); // URL sin ?callback
-        const json = await res.json(); // ahora sí es JSON
-        return json.currentCode;
-    } catch (err) {
-        console.error("Error obteniendo código:", err);
-        return null;
+    async function fetchCurrentCode() {
+        try {
+            const res = await fetch(CURRENT_CODE_URL);
+            const json = await res.json(); // ahora recibe JSON puro
+            return json.currentCode;
+        } catch (err) {
+            console.error("Error obteniendo código:", err);
+            return null;
+        }
     }
-}
-
-
 
     async function checkPassword() {
         const entered = passwordInput.value.trim();
@@ -191,7 +189,7 @@ document.addEventListener("DOMContentLoaded", () => {
     async function submitForm(e) {
         e.preventDefault();
         submitBtn.disabled = true;
-        submitBtn.innerHTML = '<span class="loading-spinner"></span> Cargando...';
+        submitBtn.textContent = "Cargando...";
 
         const formData = {
             nombre: document.getElementById("nombre").value,
@@ -238,6 +236,7 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 </body>
 </html>
+
 
 
 
