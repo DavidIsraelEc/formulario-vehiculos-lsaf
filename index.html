@@ -47,122 +47,48 @@
 </style>
 </head>
 <body>
-<!-- SECCIÓN DE ACCESO -->
-<div id="accessSection" class="access-section">
-    <div class="access-container">
-        <h2><i class="fas fa-lock"></i> Sistema de Registro LSAF</h2>
-        <p>Este formulario requiere un código de acceso válido</p>
-        <div class="access-input">
-            <input type="password" id="passwordInput" placeholder="Ingrese la contraseña">
-        </div>
-        <button id="checkBtn">
-            <i class="fas fa-unlock"></i> Verificar Acceso
-        </button>
-        <p id="accessError" style="color: #fff; background: rgba(200, 0, 0, 0.5); padding: 10px; border-radius: 5px; display: none; margin-top: 15px;">
-            <i class="fas fa-exclamation-circle"></i> Código incorrecto o ya utilizado
-        </p>
-    </div>
-</div>
-
-<!-- FORMULARIO -->
-<div id="formContent" class="container hidden">
-    <div class="header">
-        <div class="logo-container">
-            <img src="https://i.imgur.com/fHV1Qo1.png" alt="Logo LSAF" class="logo">
-        </div>
-        <div class="header-text">
-            <h1>REGISTRO VEHICULAR LSAF</h1>
-            <p>Sistema de Gestión Vehicular</p>
-        </div>
+<div class="container">
+    <h2><i class="fas fa-car"></i> Acceso al Formulario</h2>
+    
+    <!-- Sección de acceso -->
+    <div id="accessSection">
+      <input type="password" id="passwordInput" placeholder="Ingrese la contraseña" />
+      <button id="checkBtn"><i class="fas fa-unlock"></i> Verificar Acceso</button>
+      <p id="accessError" class="error"></p>
     </div>
 
-    <div class="form-container">
-        <div class="info-box">
-            <i class="fas fa-info-circle"></i> Complete todos los campos obligatorios (*) para registrar el vehículo en el sistema.
-        </div>
-
-        <div id="message" class="message"></div>
-
-        <form id="vehicleForm">
-            <div class="form-section">
-                <div class="form-section-title">
-                    <i class="fas fa-user"></i> Información Personal
-                </div>
-                <div class="form-group">
-                    <label for="nombre" class="required">Nombre y Apellido</label>
-                    <input type="text" id="nombre" name="nombre" required placeholder="Ej: David Toro">
-                </div>
-                <div class="two-columns">
-                    <div class="form-group">
-                        <label for="nuim" class="required">NUIM</label>
-                        <input type="text" id="nuim" name="nuim" required placeholder="Ej: #ABCD">
-                    </div>
-                    <div class="form-group">
-                        <label for="telefono" class="required">Número de Teléfono</label>
-                        <input type="tel" id="telefono" name="telefono" required placeholder="Ej: 123456">
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-section">
-                <div class="form-section-title">
-                    <i class="fas fa-car"></i> Información del Vehículo
-                </div>
-                <div class="two-columns">
-                    <div class="form-group">
-                        <label for="marca" class="required">Marca del Vehículo</label>
-                        <input type="text" id="marca" name="marca" required placeholder="Ej: Gallivanter">
-                    </div>
-                    <div class="form-group">
-                        <label for="modelo" class="required">Modelo del Vehículo</label>
-                        <input type="text" id="modelo" name="modelo" required placeholder="Ej: Baller LE">
-                    </div>
-                </div>
-                <div class="two-columns">
-                    <div class="form-group">
-                        <label for="color" class="required">Color del Vehículo</label>
-                        <input type="text" id="color" name="color" required placeholder="Ej: Negro">
-                    </div>
-                    <div class="form-group">
-                        <label for="matricula" class="required">Matrícula del Vehículo</label>
-                        <input type="text" id="matricula" name="matricula" required placeholder="Ej: ABC-123">
-                    </div>
-                </div>
-            </div>
-
-            <button type="submit" id="submitBtn">
-                <i class="fas fa-paper-plane"></i> Registrar Vehículo
-            </button>
-        </form>
+    <!-- Contenido del formulario -->
+    <div id="formContent" class="hidden">
+      <h3>✅ Acceso concedido</h3>
+      <p>Aquí iría tu formulario embebido o el contenido protegido.</p>
     </div>
-</div>
-<script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwuZVRDOgShaXoDpfNKEG6UvO9FQ_Uh0ULlV9XOvntESC_hR0Xslz-yadDb-CkRolR_/exec"; 
+  </div>
+
+  <script>
+    const SHEET_URL = "https://script.google.com/macros/s/AKfycbwuZVRDOgShaXoDpfNKEG6UvO9FQ_Uh0ULlV9XOvntESC_hR0Xslz-yadDb-CkRolR_/exec";
     let ACTIVE_CODE = null;
 
-    // 🔹 Cargar contraseña desde Google Sheets
+    // Cargar contraseña desde Apps Script
     async function loadCurrentPassword() {
       try {
-        const response = await fetch(SCRIPT_URL);
-        const data = await response.json();
-        if (data.password) {
-          ACTIVE_CODE = data.password.trim();
-          console.log("🔑 Contraseña cargada dinámicamente:", ACTIVE_CODE);
-        } else {
-          console.error("No se encontró contraseña en la hoja.");
-        }
-      } catch (error) {
-        console.error("Error cargando contraseña:", error);
+        const res = await fetch(SHEET_URL);
+        const data = await res.json();
+        ACTIVE_CODE = data.code;
+        console.log("🔑 Código cargado desde la hoja:", ACTIVE_CODE);
+      } catch (err) {
+        console.error("❌ Error obteniendo código:", err);
       }
     }
 
-    // 🔹 Validar contraseña ingresada
+    // Verificar contraseña
     async function checkPassword() {
-      const inputPass = document.getElementById("password").value.trim();
-      document.getElementById("error").textContent = "";
+      const inputPass = document.getElementById("passwordInput").value.trim();
+      const errorEl = document.getElementById("accessError");
+      errorEl.style.display = "none";
 
       if (!ACTIVE_CODE) {
-        document.getElementById("error").textContent = "No se pudo cargar la contraseña. Intente más tarde.";
+        errorEl.textContent = "⚠️ No se pudo cargar la contraseña. Intente más tarde.";
+        errorEl.style.display = "block";
         return;
       }
 
@@ -170,36 +96,19 @@
       console.log("Código actual recibido:", ACTIVE_CODE);
 
       if (inputPass === ACTIVE_CODE) {
-        alert("✅ Acceso concedido");
-        // Aquí rediriges a tu formulario
-        window.location.href = "formulario.html";
+        document.getElementById("accessSection").classList.add("hidden");
+        document.getElementById("formContent").classList.remove("hidden");
       } else {
-        document.getElementById("error").textContent = "❌ Contraseña incorrecta";
+        errorEl.textContent = "❌ Contraseña incorrecta";
+        errorEl.style.display = "block";
       }
     }
 
-    // Ejecutar carga inicial
-    document.addEventListener("DOMContentLoaded", loadCurrentPassword);
+    // Inicializar
+    document.addEventListener("DOMContentLoaded", () => {
+      loadCurrentPassword();
+      document.getElementById("checkBtn").addEventListener("click", checkPassword);
+    });
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
