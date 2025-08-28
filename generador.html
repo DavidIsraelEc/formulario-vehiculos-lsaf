@@ -197,7 +197,7 @@
             <div class="password-display">
                 <p>Tu código de acceso generado:</p>
                 <div id="password" class="password">LSAF0000</div>
-                <p>Pulsa Generar Nuevo Código luego pulsa en Validad y por ultimo proporciona el codigo a quien desee hacer su Registro Vehicular.</p>
+                <p>Pulsa Generar Nuevo Código luego pulsa en Validar y por ultimo proporciona el codigo a quien desee hacer su Registro Vehicular.</p>
             </div>
             
             <div class="btn-container">
@@ -247,7 +247,7 @@
         // Guardar en la hoja de cálculo
         function saveToSheet() {
             saveBtn.disabled = true;
-            saveBtn.innerHTML = '<span class="loading-spinner"></span> Guardando...';
+            saveBtn.innerHTML = '<span class="loading-spinner"></span> Validando...';
             
             // Usamos JSONP para evitar problemas de CORS
             const script = document.createElement('script');
@@ -259,7 +259,7 @@
         // Manejar la respuesta del guardado
         function handleSaveResponse(data) {
             saveBtn.disabled = false;
-            saveBtn.innerHTML = '<i class="fas fa-save"></i> Código validado correctamente';
+            saveBtn.innerHTML = '<i class="fas fa-save"></i> Validar Código';
             
             if (data && data.result === "success") {
                 showMessage('¡Código Validado!', 'success');
