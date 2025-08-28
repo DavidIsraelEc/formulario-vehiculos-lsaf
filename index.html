@@ -84,16 +84,19 @@
 
 
     // Verificar contraseña
-    async function checkPassword() {
-      const inputPass = document.getElementById("passwordInput").value.trim();
-      const errorEl = document.getElementById("accessError");
-      errorEl.style.display = "none";
+    async function loadCurrentPassword() {
+  try {
+    const response = await fetch(
+      "https://script.google.com/macros/s/TU_SCRIPT_ID/exec?noCache=" + new Date().getTime()
+    );
+    const data = await response.json();
+    console.log("Contraseña cargada:", data.code);
+    ACTIVE_CODE = data.code;
+  } catch (error) {
+    console.error("Error obteniendo código:", error);
+  }
+}
 
-      if (!ACTIVE_CODE) {
-        errorEl.textContent = "⚠️ No se pudo cargar la contraseña. Intente más tarde.";
-        errorEl.style.display = "block";
-        return;
-      }
 
       console.log("Contraseña ingresada:", inputPass);
       console.log("Código actual recibido:", ACTIVE_CODE);
@@ -115,4 +118,5 @@
   </script>
 </body>
 </html>
+
 
