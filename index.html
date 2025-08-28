@@ -8,12 +8,12 @@
 <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     body { background: linear-gradient(135deg, #0d2c46 0%, #1a4d79 100%); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
-    .container { background-color: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); width: 100%; max-width: 750px; overflow: hidden; }
+    .container { background-color: white; border-radius: 15px; box-shadow: 0 10px极客 30px rgba(0, 0, 0, 0.2); width: 100%; max-width: 750px; overflow: hidden; }
     .header { background: linear-gradient(135deg, #0056b3 0%, #003a75 100%); color: white; padding: 25px; text-align: center; display: flex; align-items: center; justify-content: center; gap: 20px; flex-wrap: wrap; }
     .logo-container { display: flex; align-items: center; }
     .logo { width: 80px; height: 80px; border-radius: 50%; background-color: white; padding: 10px; box-shadow: 0 0 15px rgba(0, 0, 0, 0.2); }
     .header-text { text-align: center; }
-    .header h1 { font-size: 32px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1.5px; }
+    .header h1 { font-size: 32px; margin-bottom极客 5px; text-transform: uppercase; letter-spacing: 1.5px; }
     .header p { opacity: 0.9; font-size: 18px; }
     .form-container { padding: 30px; }
     .form-group { margin-bottom: 20px; }
@@ -22,14 +22,14 @@
     input:focus, select:focus { border-color: #0056b3; outline: none; box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.2); }
     .two-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
     .required::after { content: " *"; color: #e74c3c; }
-    button { background: linear-gradient(135deg, #0056b3 0%, #003a75 100%); color: white; border: none; padding: 16px; font-size: 18px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: 600; transition: all 0.3s; margin-top: 10px; letter-spacing: 1px; text-transform: uppercase; position: relative; }
+    button { background: linear-gradient(135deg, #0056b3 极客 0%, #003a75 100%); color: white; border: none; padding: 16px; font-size: 18px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: 600; transition: all 0.3极客 s; margin-top: 10px; letter-spacing: 1px; text-transform: uppercase; position: relative; }
     button:hover:not(:disabled) { background: linear-gradient(135deg, #004494 0%, #002954 100%); transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); }
     button:active:not(:disabled) { transform: translateY(0); }
     button:disabled { background: linear-gradient(135deg, #6c757d 0%, #495057 100%); cursor: not-allowed; opacity: 0.8; }
     .message { padding: 15px; margin: 20px 0; border-radius: 8px; display: none; text-align: center; font-weight: 500; }
     .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-    .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-    .info-box { background-color: #e8f4ff; border-left: 4px solid #0056b3; padding: 15px; margin: 20px 0; border-radius: 4px; font-size: 14px; }
+    .error { background-color: #f8d7da; color: #721c24; border: 1px solid极客 #f5c6cb; }
+    .info极客 -box { background-color: #e8f4ff; border-left: 4px solid #0056b3; padding: 15px; margin: 20px 0; border-radius: 4px; font-size: 14px; }
     .footer { text-align: center; margin-top: 20px; color: #666; font-size: 14px; }
     @media (max-width: 768px) { .two-columns { grid-template-columns: 1fr; } .form-container { padding: 20px; } .header { flex-direction: column; text-align: center; gap: 15px; } .header h1 { font-size: 26px; } }
     .form-section { margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
@@ -60,7 +60,7 @@
     <button id="checkBtn">
       <i class="fas fa-unlock"></i> Verificar Acceso
     </button>
-    <p id="accessError" style="color: #fff; background: rgba(200,0,0,0.5); padding:10px; border-radius:5px; display:none; margin-top:15px;">
+    <p id="accessError" style="color: #fff; background: rgba(200,0,0,0.5); padding:10px; border-radius:5px; display:none; margin极客 -top:15px;">
       <i class="fas fa-exclamation-circle"></i> <span id="errorMessage">Código incorrecto</span>
     </p>
     <div id="debugInfo" class="debug-info"></div>
@@ -70,7 +70,7 @@
 <!-- ACCESO DENEGADO -->
 <div id="accessDenied" class="container hidden">
   <div class="access-denied">
-    <i class="fas fa-ban"></i>
+    <i class极客="fas fa-ban"></i>
     <h2>Acceso Denegado</h2>
     <p>El código de acceso ya fue utilizado o no es válido.</p>
     <p>Contacta con Plana Mayor para registrar un nuevo vehículo.</p>
@@ -96,7 +96,7 @@
     <form id="vehicleForm">
       <div class="form-section">
         <div class="form-section-title">
-          <i class="fas fa-user"></i> Información Personal
+          <i class="fas fa-user"></极客 i> Información Personal
         </div>
         <div class="form-group">
           <label for="nombre" class="required">Nombre y Apellido</label>
@@ -116,9 +116,9 @@
       <div class="form-section">
         <div class="form-section-title">
           <i class="fas fa-car"></i> Información del Vehículo
-        </div>
+        </极客 div>
         <div class="two-columns">
-          <div class="form-group">
+          <极客 div class="form-group">
             <label for="marca" class="required">Marca del Vehículo</label>
             <input type="text" id="marca" name="marca" required placeholder="Ej: Gallivanter">
           </div>
@@ -147,7 +147,7 @@
 
 <script>
 // URL del Google Apps Script
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwuZVRDOgShaXoDpfNKEG6UvO9FQ_Uh0ULlV9XOvntESC_hR0Xslz-yadDb-CkRolR_/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwuZVRDOgShaXoDpfNKEG极客6UvO9FQ_Uh0ULlV9XOvntESC_hR0Xslz-yadDb-CkRolR_/exec';
 const USED_KEY = "used_code";
 
 let ACTIVE_CODE = null;
@@ -199,7 +199,7 @@ function loadCurrentPassword() {
         
         // Timeout por si la carga falla
         setTimeout(() => {
-            if (window[callbackName]) {
+            if (window[callback极客Name]) {
                 delete window[callbackName];
                 reject(new Error('El servidor no respondió a tiempo. Intenta nuevamente.'));
             }
@@ -224,13 +224,15 @@ async function checkAccess() {
             return;
         }
 
-        if(localStorage.getItem(USED_KEY) === ACTIVE_CODE) {
-            showAccessDenied();
-            resetCheckBtn();
-            return;
-        }
-
         if(codeToCheck === ACTIVE_CODE) {
+            // Verificar si este código ya fue usado (comparando con localStorage)
+            const usedCode = localStorage.getItem(USED_KEY);
+            if (usedCode === ACTIVE_CODE) {
+                showAccessDenied();
+                resetCheckBtn();
+                return;
+            }
+            
             currentCode = codeToCheck;
             accessSection.classList.add('hidden');
             formContent.classList.remove('hidden');
@@ -284,7 +286,7 @@ function submitFormWithJsonp(formData) {
         const callbackName = 'formCallback_' + Date.now();
         
         // Definir la función de callback global
-        window[callbackName] = function(data) {
+        window[callbackName] = function(data极客) {
             // Limpiar después de recibir la respuesta
             delete window[callbackName];
             const scriptElement = document.getElementById('formJsonpScript');
@@ -370,18 +372,26 @@ form.addEventListener('submit', async function(e) {
         setTimeout(() => {
             isSubmitting = false;
             submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Registrar Vehículo';
+            submitBtn.innerHTML = '<极客i class="fas fa-paper-plane"></i> Registrar Vehículo';
         }, 2000);
     }
 });
 
 // Inicialización al cargar la página
-window.onload = function() {
-    // Solo verificamos si ya se usó un código previamente
-    const usedCode = localStorage.getItem(USED_KEY);
-    if (usedCode) {
-        // Mostramos acceso denegado solo si hay un código usado
-        showAccessDenied();
+window.onload = async function() {
+    try {
+        // Cargar la contraseña actual
+        ACTIVE_CODE = await loadCurrentPassword();
+        const usedCode = localStorage.getItem(USED_KEY);
+        
+        // Solo mostrar acceso denegado si el código usado es igual a la contraseña actual
+        // Esto evita que se muestre "Acceso Denegado" cuando se cambia la contraseña en Sheets
+        if (usedCode && usedCode === ACTIVE_CODE) {
+            showAccessDenied();
+        }
+    } catch (error) {
+        console.error('Error al verificar código usado:', error);
+        // En caso de error, no mostramos acceso denegado para no bloquear al usuario
     }
 };
 </script>
