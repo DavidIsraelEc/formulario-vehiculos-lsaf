@@ -6,12 +6,10 @@
 <title>Registro Vehicular LSAF</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-/* ============================================= */
-/* ESTILOS GENERALES */
-/* ============================================= */
+/* ================== DISEÑO ORIGINAL ================== */
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
 body { background: linear-gradient(135deg, #0d2c46 0%, #1a4d79 100%); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
-.container { background-color: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); width: 100%; max-width: 750px; overflow: hidden; }
+.container { background-color: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); width: 100%; max-width: 750px; overflow: hidden; }
 .header { background: linear-gradient(135deg, #0056b3 0%, #003a75 100%); color: white; padding: 25px; text-align: center; display: flex; align-items: center; justify-content: center; gap: 20px; flex-wrap: wrap; }
 .logo-container { display: flex; align-items: center; }
 .logo { width: 80px; height: 80px; border-radius: 50%; background-color: white; padding: 10px; box-shadow: 0 0 15px rgba(0,0,0,0.2); }
@@ -42,12 +40,28 @@ button:disabled { background: linear-gradient(135deg,#6c757d 0%,#495057 100%); c
 <body>
 
 <!-- ================= ACCESO ================= -->
-<div id="accessSection" class="container">
-  <h2><i class="fas fa-lock"></i> Sistema de Registro LSAF</h2>
-  <p>Este formulario requiere un código de acceso válido</p>
-  <input type="text" id="accessCode" placeholder="Ingresa el código de acceso" style="padding:12px;width:100%;margin:15px 0;font-size:16px;border-radius:6px;border:1px solid #ddd;">
-  <button id="checkBtn"><i class="fas fa-unlock"></i> Verificar Acceso</button>
-  <p id="accessError" class="error" style="display:none;"></p>
+<div id="accessSection" class="access-section">
+  <div class="access-container">
+    <h2><i class="fas fa-lock"></i> Sistema de Registro LSAF</h2>
+    <p>Este formulario requiere un código de acceso válido</p>
+    <div class="access-input">
+      <input type="text" id="accessCode" placeholder="Ingresa el código de acceso">
+    </div>
+    <button id="checkBtn"><i class="fas fa-unlock"></i> Verificar Acceso</button>
+    <p id="accessError" style="color: #fff; background: rgba(200,0,0,0.5); padding:10px; border-radius:5px; display:none; margin-top:15px;">
+      <i class="fas fa-exclamation-circle"></i> Código incorrecto o ya utilizado
+    </p>
+  </div>
+</div>
+
+<!-- ================= DENEGADO ================= -->
+<div id="accessDenied" class="container hidden">
+  <div class="access-denied">
+    <i class="fas fa-ban"></i>
+    <h2>Acceso Denegado</h2>
+    <p>El código de acceso ya fue utilizado o no es válido.</p>
+    <p>Contacta con Plana Mayor para registrar un nuevo vehículo.</p>
+  </div>
 </div>
 
 <!-- ================= FORMULARIO ================= -->
@@ -122,23 +136,25 @@ button:disabled { background: linear-gradient(135deg,#6c757d 0%,#495057 100%); c
 </div>
 
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwuZVRDOgShaXoDpfNKEG6UvO9FQ_Uh0ULlV9XOvntESC_hR0Xslz-yadDb-CkRolR_/exec"; // Pon aquí la URL de tu Web App
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwuZVRDOgShaXoDpfNKEG6UvO9FQ_Uh0ULlV9XOvntESC_hR0Xslz-yadDb-CkRolR_/exec";
+const USED_KEY = "used_code";
 let ACTIVE_CODE = "";
+let currentCode = null;
 
-// =================== ACCESO ===================
-const accessCodeInput = document.getElementById("accessCode");
-const checkBtn = document.getElementById("checkBtn");
-const accessError = document.getElementById("accessError");
-const accessSection = document.getElementById("accessSection");
-const formContent = document.getElementById("formContent");
+const accessSection = document.getElementById('accessSection');
+const accessDenied = document.getElementById('accessDenied');
+const formContent = document.getElementById('formContent');
+const accessError = document.getElementById('accessError');
+const accessCodeInput = document.getElementById('accessCode');
+const checkBtn = document.getElementById('checkBtn');
 
 async function loadCurrentPassword() {
   try {
-    const res = await fetch(SCRIPT_URL);
-    const data = await res.json();
-    ACTIVE_CODE = data.password;
+    const response = await fetch(`${SCRIPT_URL}?action=getPassword`);
+    const data = await response.json();
+    if(data.password) ACTIVE_CODE = data.password;
   } catch (err) {
-    console.error("Error obteniendo código:", err);
+    console.error('Error al cargar contraseña:', err);
   }
 }
 
@@ -146,66 +162,83 @@ async function checkAccess() {
   checkBtn.disabled = true;
   checkBtn.innerHTML = '<span class="loading-spinner"></span> Verificando...';
   await loadCurrentPassword();
-  const code = accessCodeInput.value.trim();
 
-  if (code === ACTIVE_CODE) {
-    accessSection.classList.add("hidden");
-    formContent.classList.remove("hidden");
+  const codeToCheck = accessCodeInput.value.trim();
+
+  if(localStorage.getItem(USED_KEY) === ACTIVE_CODE) {
+    accessSection.classList.add('hidden');
+    accessDenied.classList.remove('hidden');
+    return;
+  }
+
+  if(codeToCheck === ACTIVE_CODE) {
+    currentCode = codeToCheck;
+    accessSection.classList.add('hidden');
+    formContent.classList.remove('hidden');
   } else {
-    accessError.textContent = "❌ Código incorrecto";
-    accessError.style.display = "block";
-    setTimeout(() => accessError.style.display = "none", 3000);
+    accessError.style.display = 'block';
+    setTimeout(()=>accessError.style.display='none',3000);
   }
   checkBtn.disabled = false;
   checkBtn.innerHTML = '<i class="fas fa-unlock"></i> Verificar Acceso';
 }
 
-checkBtn.addEventListener("click", checkAccess);
-accessCodeInput.addEventListener("keypress", e => { if(e.key === 'Enter') checkAccess(); });
+checkBtn.addEventListener('click', checkAccess);
+accessCodeInput.addEventListener('keypress', e=>{if(e.key==='Enter') checkAccess();});
 
-// =================== FORMULARIO ===================
+// ================= FORMULARIO =================
 const form = document.getElementById("vehicleForm");
 const submitBtn = document.getElementById("submitBtn");
 const messageDiv = document.getElementById("message");
 
-form.addEventListener("submit", async e => {
+form.addEventListener('submit', async e=>{
   e.preventDefault();
-  submitBtn.disabled = true;
-  submitBtn.innerHTML = '<span class="loading-spinner"></span> Enviando...';
+  submitBtn.disabled=true;
+  submitBtn.innerHTML='<span class="loading-spinner"></span> Enviando...';
 
   const formData = {
-    nombre: document.getElementById("nombre").value,
-    nuim: document.getElementById("nuim").value,
-    telefono: document.getElementById("telefono").value,
-    marca: document.getElementById("marca").value,
-    modelo: document.getElementById("modelo").value,
-    color: document.getElementById("color").value,
-    matricula: document.getElementById("matricula").value
+    nombre: document.getElementById('nombre').value,
+    nuim: document.getElementById('nuim').value,
+    telefono: document.getElementById('telefono').value,
+    marca: document.getElementById('marca').value,
+    modelo: document.getElementById('modelo').value,
+    color: document.getElementById('color').value,
+    matricula: document.getElementById('matricula').value
   };
 
   try {
     const res = await fetch(SCRIPT_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData)
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(formData)
     });
     const data = await res.json();
-    if(data.status === "ok"){
-      messageDiv.textContent = "✅ Vehículo registrado correctamente";
-      messageDiv.className = "message success";
+    if(data.status==='ok'){
+      messageDiv.textContent='✅ Vehículo registrado correctamente';
+      messageDiv.className='message success';
       form.reset();
+      if(currentCode) localStorage.setItem(USED_KEY,currentCode);
     } else {
       throw new Error(data.message);
     }
-  } catch(err) {
+  } catch(err){
     console.error(err);
-    messageDiv.textContent = "❌ Error al enviar los datos";
-    messageDiv.className = "message error";
+    messageDiv.textContent='❌ Error al enviar los datos';
+    messageDiv.className='message error';
   }
 
-  submitBtn.disabled = false;
-  submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Registrar Vehículo';
+  submitBtn.disabled=false;
+  submitBtn.innerHTML='<i class="fas fa-paper-plane"></i> Registrar Vehículo';
 });
+
+// ================= INICIO =================
+window.onload = async ()=>{
+  await loadCurrentPassword();
+  if(localStorage.getItem(USED_KEY)===ACTIVE_CODE){
+    accessSection.classList.add('hidden');
+    accessDenied.classList.remove('hidden');
+  }
+};
 </script>
 
 </body>
