@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Códigos - LSAF</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+        }
+        body { 
+            background: linear-gradient(135deg, #0d2c46 0%, #1a4d79 100%); 
+            min-height: 100vh; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            padding: 20px; 
+        }
+        .container { 
+            background-color: white; 
+            border-radius: 15px; 
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); 
+            width: 100%; 
+            max-width: 600px; 
+            overflow: hidden; 
+        }
+        .header { 
+            background: linear-gradient(135deg, #0056b3 0%, #003a75 100%); 
+            color: white; 
+            padding: 25px; 
+            text-align: center; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 20px; 
+            flex-wrap: wrap; 
+        }
+        .logo-container { 
+            display: flex; 
+            align-items: center; 
+        }
+        .logo { 
+            width: 80px; 
+            height: 80px; 
+            border-radius: 50%; 
+            background-color: white; 
+            padding: 10px; 
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2); 
+        }
+        .header-text { 
+            text-align: center; 
+        }
+        .header h1 { 
+            font-size: 28px; 
+            margin-bottom: 5px; 
+            text-transform: uppercase; 
+            letter-spacing: 1.5px; 
+        }
+        .header p { 
+            opacity: 0.9; 
+            font-size: 16px; 
+        }
+        .form-container { 
+            padding: 30px; 
+        }
+        .info-box { 
+            background-color: #e8f4ff; 
+            border-left: 4px solid #0056b3; 
+            padding: 15px; 
+            margin: 20px 0; 
+            border-radius: 4px; 
+            font-size: 14px; 
+        }
+        .password-display {
+            text-align: center;
+            margin: 25px 0;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 10px;
+            border: 2px dashed #0056b3;
+        }
+        .password {
+            font-size: 32px;
+            font-weight: bold;
+            color: #0056b3;
+            letter-spacing: 3px;
+            margin: 10px 0;
+        }
+        .btn-container {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        button { 
+            background: linear-gradient(135deg, #0056b3 0%, #003a75 100%); 
+            color: white; 
+            border: none; 
+            padding: 14px 20px; 
+            font-size: 16px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            transition: all 0.3s; 
+            letter-spacing: 1px; 
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 180px;
+            justify-content: center;
+        }
+        button:hover { 
+            background: linear-gradient(135deg, #004494 0%, #002954 100%); 
+            transform: translateY(-2px); 
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); 
+        }
+        button:active { 
+            transform: translateY(0); 
+        }
+        button.copy {
+            background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+        }
+        button.copy:hover {
+            background: linear-gradient(135deg, #218838 0%, #186429 100%);
+        }
+        button.save {
+            background: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%);
+        }
+        button.save:hover {
+            background: linear-gradient(135deg, #e76a4b 0%, #eca066 100%);
+        }
+        .message { 
+            padding: 15px; 
+            margin: 20px 0; 
+            border-radius: 8px; 
+            display: none; 
+            text-align: center; 
+            font-weight: 500; 
+        }
+        .success { 
+            background-color: #d4edda; 
+            color: #155724; 
+            border: 1px solid #c3e6cb; 
+        }
+        .error { 
+            background-color: #f8d7da; 
+            color: #721c24; 
+            border: 1px solid #f5c6cb; 
+        }
+        .loading-spinner { 
+            display: inline-block; 
+            width: 20px; 
+            height: 20px; 
+            border: 3px solid rgba(255,255,255,.3); 
+            border-radius: 50%; 
+            border-top-color: #fff; 
+            animation: spin 1s ease-in-out infinite; 
+        }
+        @keyframes spin { 
+            to { transform: rotate(360deg); } 
+        }
+        @media (max-width: 768px) { 
+            .btn-container { 
+                flex-direction: column; 
+            }
+            .header { 
+                flex-direction: column; 
+                text-align: center; 
+                gap: 15px; 
+            } 
+            .header h1 { 
+                font-size: 24px; 
+            } 
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo-container">
+                <img src="https://i.imgur.com/fHV1Qo1.png" alt="Logo LSAF" class="logo">
+            </div>
+            <div class="header-text">
+                <h1>GENERADOR DE CÓDIGOS LSAF</h1>
+                <p>Sistema de Gestión de Accesos</p>
+            </div>
+        </div>
+        <div class="form-container">
+            <div class="info-box">
+                <i class="fas fa-info-circle"></i> Genera un nuevo código de acceso para el formulario de registro vehicular.
+            </div>
+            
+            <div class="password-display">
+                <p>Tu código de acceso generado:</p>
+                <div id="password" class="password">LSAF0000</div>
+                <p>Este código se actualizará en la hoja de cálculo después de guardarlo.</p>
+            </div>
+            
+            <div class="btn-container">
+                <button id="generateBtn">
+                    <i class="fas fa-sync-alt"></i> Generar Nuevo Código
+                </button>
+                <button id="copyBtn" class="copy">
+                    <i class="fas fa-copy"></i> Copiar al Portapapeles
+                </button>
+                <button id="saveBtn" class="save">
+                    <i class="fas fa-save"></i> Guardar en Hoja
+                </button>
+            </div>
+            
+            <div id="message" class="message"></div>
+        </div>
+    </div>
+
+    <script>
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxbYOhVgRfOlg7NuhVikGWdRfQeCg6NO6IzHCEcabODfTFNjN-y8sDUmqtiESuGpr4/exec';
+        let currentPassword = 'LSAF0000';
+        
+        const passwordElement = document.getElementById('password');
+        const generateBtn = document.getElementById('generateBtn');
+        const copyBtn = document.getElementById('copyBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const messageDiv = document.getElementById('message');
+        
+        // Generar código aleatorio con formato LSAF + 4 dígitos
+        function generatePassword() {
+            const randomNum = Math.floor(1000 + Math.random() * 9000); // Número de 4 dígitos
+            currentPassword = "LSAF" + randomNum;
+            passwordElement.textContent = currentPassword;
+            messageDiv.style.display = 'none';
+        }
+        
+        // Copiar al portapapeles
+        function copyToClipboard() {
+            navigator.clipboard.writeText(currentPassword).then(() => {
+                showMessage('Código copiado al portapapeles', 'success');
+            }).catch(err => {
+                showMessage('Error al copiar: ' + err, 'error');
+            });
+        }
+        
+        // Guardar en la hoja de cálculo
+        function saveToSheet() {
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<span class="loading-spinner"></span> Guardando...';
+            
+            // Usamos JSONP para evitar problemas de CORS
+            const script = document.createElement('script');
+            script.src = `${SCRIPT_URL}?action=updatePassword&password=${currentPassword}&callback=handleSaveResponse`;
+            document.body.appendChild(script);
+            document.body.removeChild(script);
+        }
+        
+        // Manejar la respuesta del guardado
+        function handleSaveResponse(data) {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = '<i class="fas fa-save"></i> Guardar en Hoja';
+            
+            if (data.result === "success") {
+                showMessage('¡Código guardado correctamente en la hoja!', 'success');
+            } else {
+                showMessage('Error: ' + data.message, 'error');
+            }
+        }
+        
+        // Mostrar mensaje
+        function showMessage(msg, type) {
+            messageDiv.textContent = msg;
+            messageDiv.className = `message ${type}`;
+            messageDiv.style.display = "block";
+            
+            // Ocultar mensaje después de 5 segundos
+            setTimeout(() => {
+                messageDiv.style.display = "none";
+            }, 5000);
+        }
+        
+        // Event listeners
+        generateBtn.addEventListener('click', generatePassword);
+        copyBtn.addEventListener('click', copyToClipboard);
+        saveBtn.addEventListener('click', saveToSheet);
+        
+        // Generar un código inicial al cargar la página
+        generatePassword();
+    </script>
+</body>
+</html>
