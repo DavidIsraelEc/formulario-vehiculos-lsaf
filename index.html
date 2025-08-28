@@ -70,15 +70,18 @@
 
     // Cargar contraseña desde Apps Script
     async function loadCurrentPassword() {
-      try {
-        const res = await fetch(SHEET_URL);
-        const data = await res.json();
-        ACTIVE_CODE = data.code;
-        console.log("🔑 Código cargado desde la hoja:", ACTIVE_CODE);
-      } catch (err) {
-        console.error("❌ Error obteniendo código:", err);
-      }
-    }
+  try {
+    const response = await fetch(
+      "https://script.google.com/macros/s/AKfycbwuZVRDOgShaXoDpfNKEG6UvO9FQ_Uh0ULlV9XOvntESC_hR0Xslz-yadDb-CkRolR_/exec?noCache=" + new Date().getTime()
+    );
+    const data = await response.json();
+    console.log("Respuesta Apps Script:", data);
+    currentPassword = data.code;
+  } catch (error) {
+    console.error("Error obteniendo código:", error);
+  }
+}
+
 
     // Verificar contraseña
     async function checkPassword() {
@@ -112,3 +115,4 @@
   </script>
 </body>
 </html>
+
