@@ -64,16 +64,6 @@
     </div>
 </div>
 
-<!-- ACCESO DENEGADO -->
-<div id="accessDenied" class="container hidden">
-    <div class="access-denied">
-        <i class="fas fa-ban"></i>
-        <h2>Acceso Denegado</h2>
-        <p>El código de acceso ya fue utilizado o no es válido.</p>
-        <p>Contacta con Plana Mayor para registrar un nuevo vehículo.</p>
-    </div>
-</div>
-
 <!-- FORMULARIO -->
 <div id="formContent" class="container hidden">
     <div class="header">
@@ -163,7 +153,7 @@ document.addEventListener("DOMContentLoaded", () => {
     async function fetchCurrentCode() {
         try {
             const res = await fetch(CURRENT_CODE_URL);
-            const json = await res.json(); // ahora recibe JSON puro
+            const json = await res.json();  // JSON limpio desde Apps Script
             return json.currentCode;
         } catch (err) {
             console.error("Error obteniendo código:", err);
@@ -189,7 +179,7 @@ document.addEventListener("DOMContentLoaded", () => {
     async function submitForm(e) {
         e.preventDefault();
         submitBtn.disabled = true;
-        submitBtn.textContent = "Cargando...";
+        submitBtn.innerHTML = '<span class="loading-spinner"></span> Cargando...';
 
         const formData = {
             nombre: document.getElementById("nombre").value,
@@ -208,7 +198,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 body: JSON.stringify(formData)
             });
             const result = await res.json();
-
             if (result.status === "success") {
                 messageBox.textContent = "Registro enviado con éxito!";
                 messageBox.className = "message success";
@@ -236,6 +225,7 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 </body>
 </html>
+
 
 
 
