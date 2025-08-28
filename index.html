@@ -164,16 +164,38 @@ async function loadCurrentPassword() {
 }
 
 async function checkAccess() {
+    // Deshabilitar botón y mostrar spinner
+    const checkBtn = document.getElementById('checkBtn');
+    checkBtn.disabled = true;
+    const originalText = checkBtn.innerHTML;
+    checkBtn.innerHTML = '<span class="loading-spinner"></span> Verificando...';
+
     await loadCurrentPassword();
     let codeToCheck = accessCodeInput.value.trim();
-    if (!codeToCheck) { showError("Por favor ingresa un código"); return; }
-    if (localStorage.getItem(USED_KEY) === ACTIVE_CODE) { showAccessDenied(); return; }
+
+    if (!codeToCheck) {
+        showError("Por favor ingresa un código");
+        checkBtn.disabled = false;
+        checkBtn.innerHTML = originalText;
+        return;
+    }
+
+    if (localStorage.getItem(USED_KEY) === ACTIVE_CODE) {
+        showAccessDenied();
+        checkBtn.disabled = false;
+        checkBtn.innerHTML = originalText;
+        return;
+    }
+
     if (codeToCheck === ACTIVE_CODE) {
         currentCode = codeToCheck;
         accessSection.classList.add('hidden');
         formContent.classList.remove('hidden');
+        // Una vez mostrado el formulario, el botón ya no es necesario
     } else {
         showError("Código incorrecto");
+        checkBtn.disabled = false;
+        checkBtn.innerHTML = originalText;
     }
 }
 
@@ -305,4 +327,5 @@ document.getElementById('checkBtn').addEventListener('click', checkAccess);
 </script>
 </body>
 </html>
+
 
